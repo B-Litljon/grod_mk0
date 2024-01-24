@@ -3,11 +3,12 @@ import pandas as pd
 import numpy as np
 import os
 
-# Your Binance API key and secret (optional for market data streams)
-api_key = 'your_api_key'
-api_secret = 'your_api_secret'
+# Access environment variables
+api_key = os.getenv('BINANCE_API_KEY')
+api_secret = os.getenv('BINANCE_API_SECRET')
 
-# Initialize the Binance client (optional if only accessing public data)
+# Use the variables in your script
+# For example, initializing the Binance client
 client = Client(api_key, api_secret)
 
 # Function to handle incoming WebSocket messages for K-line data
