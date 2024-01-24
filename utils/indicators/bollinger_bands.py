@@ -1,19 +1,35 @@
-import numpy as np
+import os
+from binance.client import Client
 import pandas as pd
 
-def calculate_bollinger_bands(prices, window=20, num_of_std=2):
-    """
-    Calculate Bollinger Bands for a given set of prices.
+# Fetch API keys from environment variables for better security
+api_key = os.getenv('BINANCE_API_KEY')
+api_secret = os.getenv('BINANCE_API_SECRET')
+
+def fetch_historical_data(symbol, interval, lookback):
+    client = Client(api_key, api_secret)
+    candles = client.get_klines(symbol=symbol, interval=interval, limit=lookback)
     
-    :param prices: A pandas Series of prices.
-    :param window: The moving average window size.
-    :param num_of_std: Number of standard deviations for the bands.
-    :return: A DataFrame with Bollinger Bands (upper_band, lower_band, middle_band).
-    """
+    df = pd.DataFrame(candles, columns=['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
+    df = df.apply(pd.to_numeric, errors='ignore')
+    df['open_time'] = pd.to_datetime(df['open_time'], unit='ms')
+    df['close_time'] = pd.to_datetime(df['close_time'], unit='ms')
+    
+    return df['close']
+
+def calculate_bollinger_bands(symbol, interval, lookback, window=20, num_of_std=2):
+    prices = fetch_historical_data(symbol, interval, lookback)
+    
     middle_band = prices.rolling(window=window).mean()
     std_dev = prices.rolling(window=window).std()
-    
     upper_band = middle_band + (std_dev * num_of_std)
     lower_band = middle_band - (std_dev * num_of_std)
     
     return pd.DataFrame({'upper_band': upper_band, 'middle_band': middle_band, 'lower_band': lower_band})
+
+# Example usage:
+# symbol = 'BTCUSDT'
+# interval = Client.KLINE_INTERVAL_1MINUTE
+# lookback = 100  # Ensure this is sufficient for your Bollinger Band calculations
+# bollinger_bands = calculate_bollinger_bands(symbol, interval, lookback)
+# print(bollinger_bands.tail())
