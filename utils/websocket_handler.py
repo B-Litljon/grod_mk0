@@ -29,6 +29,7 @@ def handle_socket_message(msg):
     
     # Extract the candlestick data from the message
     candlestick = msg['k']
+    rsi_value = None
     
     # Extracting relevant information from the candlestick data
     open_price = float(candlestick['o'])
@@ -42,15 +43,19 @@ def handle_socket_message(msg):
     if hasattr(bbands, 'prices') and len(bbands.prices) > 0:
         previous_close = bbands.prices[-1]
         rsi_value = rsi_indicator.update(close_price, previous_close)
-        print(f"Updated RSI: {rsi_value}")
-    
+
     upper_band, middle_band, lower_band = bbands.update(close_price)
     support, resistance = sup_res.update(high_price, low_price)
     
-    # Print updated information
-    print(f"Candlestick for {close_time}: Open: {open_price}, High: {high_price}, Low: {low_price}, Close: {close_price}, Volume: {volume}")
-    print(f"Updated Bollinger Bands: Upper: {upper_band}, Middle: {middle_band}, Lower: {lower_band}")
-    print(f"Updated Support/Resistance: Support: {support}, Resistance: {resistance}")
+    # Prepare the information to be printed
+    output_str = f"Candlestick for {close_time}: Open: {open_price}, High: {high_price}, Low: {low_price}, Close: {close_price}, Volume: {volume}"
+    output_str += f"\nUpdated Bollinger Bands: Upper: {upper_band}, Middle: {middle_band}, Lower: {lower_band}"
+    output_str += f"\nUpdated Support/Resistance: Support: {support}, Resistance: {resistance}"
+    if rsi_value is not None:
+        output_str += f"\nUpdated RSI: {rsi_value}"
+
+    # Print the information dynamically
+    print("\r" + output_str.ljust(150), end="")  # Pad with spaces to ensure line clears
 
     sys.stdout.flush()  # Flush output buffer
 
