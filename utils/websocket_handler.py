@@ -98,7 +98,9 @@ def handle_socket_message(msg):
         'Support': support,
         'Resistance': resistance
     }
-    data_df = data_df.append(new_data, ignore_index=True)
+    
+    # Using concat instead of append
+    data_df = pd.concat([data_df, pd.DataFrame(new_data)], ignore_index=True)
 
 
     sys.stdout.flush()  # Flush output buffer
