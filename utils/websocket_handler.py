@@ -1,10 +1,11 @@
 from binance import Client, ThreadedWebsocketManager
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import sys
 import os
 import time
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from indicators.bollinger_bands import BollingerBands
 from indicators.rsi import RSI
 from indicators.sup_res import SupportResistance
@@ -21,14 +22,52 @@ bbands = BollingerBands(window=20, num_of_std=2)
 rsi_indicator = RSI(period=14)
 sup_res = SupportResistance(window=14)
 
+
+# Global DataFrame to accumulate data
+data_df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'RSI', 'UpperBB', 'MiddleBB', 'LowerBB', 'Support', 'Resistance'])
+
+# Initialize Plotly figure
+fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.2, subplot_titles=('Candlesticks with Bollinger Bands', 'RSI'))
+fig.add_trace(go.Candlestick(x=[], open=[], high=[], low=[], close=[], name='Candlesticks'), row=1, col=1)
+fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='Upper Band'), row=1, col=1)
+fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='Middle Band'), row=1, col=1)
+fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='Lower Band'), row=1, col=1)
+fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='RSI'), row=2, col=1)
+fig.update_layout(xaxis_rangeslider_visible=False, height=800)
+
+def update_plot():
+    fig.data[0].x = data_df['Time']
+    fig.data[0].open = data_df['Open']
+    fig.data[0].high = data_df['High']
+    fig.data[0].low = data_df['Low']
+    fig.data[0].close = data_df['Close']
+
+    fig.data[1].x = data_df['Time']
+    fig.data[1].y = data_df['UpperBB']
+
+    fig.data[2].x = data_df['Time']
+    fig.data[2].y = data_df['MiddleBB']
+
+    fig.data[3].x = data_df['Time']
+    fig.data[3].y = data_df['LowerBB']
+
+    fig.data[4].x = data_df['Time']
+    fig.data[4].y = data_df['RSI']
+
+    fig.show()
+
+
 #client = Client(api_key, api_secret, tld='us')
 # Function to handle incoming WebSocket messages for K-line data
 def handle_socket_message(msg):
+    global data_df # Referencing global DataFrame
+
     print("Message received")  # Debugging print
     sys.stdout.flush()  # Flush output buffer
     
     # Extract the candlestick data from the message
     candlestick = msg['k']
+    rsi_value = None
     
     # Extracting relevant information from the candlestick data
     open_price = float(candlestick['o'])
@@ -38,19 +77,29 @@ def handle_socket_message(msg):
     volume = float(candlestick['v'])
     close_time = pd.to_datetime(candlestick['T'], unit='ms')
     
-    # Update rolling window data structures with new price data
+    # Update indicators
     if hasattr(bbands, 'prices') and len(bbands.prices) > 0:
         previous_close = bbands.prices[-1]
         rsi_value = rsi_indicator.update(close_price, previous_close)
-        print(f"Updated RSI: {rsi_value}")
-    
+
     upper_band, middle_band, lower_band = bbands.update(close_price)
     support, resistance = sup_res.update(high_price, low_price)
     
-    # Print updated information
-    print(f"Candlestick for {close_time}: Open: {open_price}, High: {high_price}, Low: {low_price}, Close: {close_price}, Volume: {volume}")
-    print(f"Updated Bollinger Bands: Upper: {upper_band}, Middle: {middle_band}, Lower: {lower_band}")
-    print(f"Updated Support/Resistance: Support: {support}, Resistance: {resistance}")
+    new_data = {
+        'Time': close_time,
+        'Open': open_price,
+        'High': high_price,
+        'Low': low_price,
+        'Close': close_price,
+        'RSI': rsi_value if rsi_value is not None else np.nan,
+        'UpperBB': upper_band,
+        'MiddleBB': middle_band,
+        'LowerBB': lower_band,
+        'Support': support,
+        'Resistance': resistance
+    }
+    data_df = data_df.append(new_data, ignore_index=True)
+
 
     sys.stdout.flush()  # Flush output buffer
 
