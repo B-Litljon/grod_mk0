@@ -60,6 +60,8 @@ def update_plot():
 #client = Client(api_key, api_secret, tld='us')
 # Function to handle incoming WebSocket messages for K-line data
 def handle_socket_message(msg):
+    global data_df # Referencing global DataFrame
+
     print("Message received")  # Debugging print
     sys.stdout.flush()  # Flush output buffer
     
@@ -75,7 +77,7 @@ def handle_socket_message(msg):
     volume = float(candlestick['v'])
     close_time = pd.to_datetime(candlestick['T'], unit='ms')
     
-    # Update rolling window data structures with new price data
+    # Update indicators
     if hasattr(bbands, 'prices') and len(bbands.prices) > 0:
         previous_close = bbands.prices[-1]
         rsi_value = rsi_indicator.update(close_price, previous_close)
@@ -83,15 +85,21 @@ def handle_socket_message(msg):
     upper_band, middle_band, lower_band = bbands.update(close_price)
     support, resistance = sup_res.update(high_price, low_price)
     
-    # Prepare the information to be printed
-    output_str = f"Candlestick for {close_time}: Open: {open_price}, High: {high_price}, Low: {low_price}, Close: {close_price}, Volume: {volume}"
-    output_str += f"\nUpdated Bollinger Bands: Upper: {upper_band}, Middle: {middle_band}, Lower: {lower_band}"
-    output_str += f"\nUpdated Support/Resistance: Support: {support}, Resistance: {resistance}"
-    if rsi_value is not None:
-        output_str += f"\nUpdated RSI: {rsi_value}"
+    new_data = {
+        'Time': close_time,
+        'Open': open_price,
+        'High': high_price,
+        'Low': low_price,
+        'Close': close_price,
+        'RSI': rsi_value if rsi_value is not None else np.nan,
+        'UpperBB': upper_band,
+        'MiddleBB': middle_band,
+        'LowerBB': lower_band,
+        'Support': support,
+        'Resistance': resistance
+    }
+    data_df = data_df.append(new_data, ignore_index=True)
 
-    # Print the information dynamically
-    print("\r" + output_str.ljust(150), end="")  # Pad with spaces to ensure line clears
 
     sys.stdout.flush()  # Flush output buffer
 
