@@ -10,6 +10,7 @@ from indicators.bollinger_bands import BollingerBands
 from indicators.rsi import RSI
 from indicators.sup_res import SupportResistance
 from dotenv import load_dotenv
+from plotly.offline import plot, iplot
 
 
 load_dotenv()
@@ -99,16 +100,16 @@ def handle_socket_message(msg):
         'Resistance': resistance
     }
     
+    new_data_df = pd.DataFrame(new_data, index=[0])
     # Using concat instead of append
-    data_df = pd.concat([data_df, pd.DataFrame(new_data)], ignore_index=True)
-    
+    data_df = pd.concat([data_df, new_data_df], ignore_index=True)    
     # Limit DataFrame size
-    max_rows = 1000  # Set a suitable limit
+    max_rows = 1000  # Maximum number of rows before deleting old data
     if len(data_df) > max_rows:
         data_df.drop(data_df.index[0], inplace=True)
 
     # Update plot
-    #update_plot()
+    update_plot()
 
 
     sys.stdout.flush()  # Flush output buffer
@@ -127,8 +128,6 @@ try:
 except KeyboardInterrupt:
     twm.stop_socket(stream_name)
     twm.join()
+# Import the necessary module
+# ...
 
-
-"""
-ok so we have a websocket connection to stream data buuuut the variable names are all screwed up and the melatonin is kicking in so i'm gonna call it a night... or day in my case lol
-"""
