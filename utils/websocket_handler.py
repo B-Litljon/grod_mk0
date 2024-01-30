@@ -101,6 +101,14 @@ def handle_socket_message(msg):
     
     # Using concat instead of append
     data_df = pd.concat([data_df, pd.DataFrame(new_data)], ignore_index=True)
+    
+    # Limit DataFrame size
+    max_rows = 1000  # Set a suitable limit
+    if len(data_df) > max_rows:
+        data_df.drop(data_df.index[0], inplace=True)
+
+    # Update plot
+    #update_plot()
 
 
     sys.stdout.flush()  # Flush output buffer
