@@ -4,12 +4,10 @@ import numpy as np
 import sys
 import os
 import time
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+from dotenv import load_dotenv
 from indicators.bollinger_bands import BollingerBands
 from indicators.rsi import RSI
 from indicators.sup_res import SupportResistance
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -26,10 +24,8 @@ data_df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'RSI', '
 
 def handle_socket_message(msg):
     global data_df # Referencing global DataFrame
-
     print("Message received")  # Debugging print
     sys.stdout.flush()  # Flush output buffer
-    
     # Extract the candlestick data from the message
     candlestick = msg['k']
     rsi_value = None

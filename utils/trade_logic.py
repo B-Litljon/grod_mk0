@@ -9,8 +9,8 @@ TOTAL_CAPITAL = 1000  # Total trading capital
 # Define a function to calculate trade size based on risk and stop distance
 def calculate_trade_size(entry_price, stop_loss_price, total_capital, max_risk_per_trade, position='long'):
     risk_per_share = entry_price - stop_loss_price if position == 'long' else stop_loss_price - entry_price
-    shares_to_buy = (total_capital * max_risk_per_trade) / risk_per_share
-    return shares_to_buy
+    num_of_shares_to_buy = (total_capital * max_risk_per_trade) / risk_per_share
+    return num_of_shares_to_buy
 
 # Update the make_trade_decision function to include Bollinger Band width for determining 'power'
 def make_trade_decision(rsi_value, close_price, lower_band, middle_band, upper_band, total_capital, max_risk_per_trade, volume, moving_average):
@@ -35,9 +35,9 @@ def make_trade_decision(rsi_value, close_price, lower_band, middle_band, upper_b
     if rsi_value < RSI_OVERSOLD and close_price <= lower_band:
         print("Buy signal triggered: RSI oversold and price near lower Bollinger Band.")
         # Calculate the number of shares to buy
-        shares_to_buy = calculate_trade_size(close_price, stop_loss_long, total_capital, max_risk_per_trade, position='long')
+        num_of_shares_to_buy = calculate_trade_size(close_price, stop_loss_long, total_capital, max_risk_per_trade, position='long')
         # Place buy order logic here
-        # client.create_order(symbol='BTCUSDT', side='BUY', type='LIMIT', quantity=shares_to_buy, price=close_price)
+        # client.create_order(symbol='BTCUSDT', side='BUY', type='LIMIT', quantity=num_of_shares_to_buy, price=close_price)
 
     # Check if RSI indicates overbought and price is near the upper Bollinger Band
     elif rsi_value > RSI_OVERBOUGHT and close_price >= upper_band:
