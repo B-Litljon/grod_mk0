@@ -1,6 +1,6 @@
 
 class RSI:
-    def __init__(self, period=14):
+    def __init__(self, period=13):
         self.period = period
         self.gains = []
         self.losses = []
