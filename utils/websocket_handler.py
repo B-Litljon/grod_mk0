@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from indicators.bollinger_bands import BollingerBands
 from indicators.rsi import RSI
 from indicators.sup_res import SupportResistance
+from trade_logic import calculate_trade_size, make_trade_decision
 
 # Load environment variables
 load_dotenv()

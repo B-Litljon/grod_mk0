@@ -1,6 +1,6 @@
 # Define thresholds for RSI
-RSI_OVERSOLD = 30
-RSI_OVERBOUGHT = 70
+RSI_OVERSOLD = 25
+RSI_OVERBOUGHT = 75
 
 # Define your risk parameters
 MAX_RISK_PER_TRADE = 0.02  # 2% of total capital at risk per trade
@@ -13,7 +13,7 @@ def calculate_trade_size(entry_price, stop_loss_price, total_capital, max_risk_p
     return num_of_shares_to_buy
 
 # Update the make_trade_decision function to include Bollinger Band width for determining 'power'
-def make_trade_decision(rsi_value, close_price, lower_band, middle_band, upper_band, total_capital, max_risk_per_trade, volume, moving_average):
+def make_trade_decision(rsi_value, close_price, lower_band, middle_band, upper_band, total_capital, max_risk_per_trade, moving_average):
     # Calculate Bollinger Band width
     band_width = upper_band - lower_band
 
