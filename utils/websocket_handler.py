@@ -11,54 +11,19 @@ from indicators.rsi import RSI
 from indicators.sup_res import SupportResistance
 from dotenv import load_dotenv
 
-
+# Load environment variables
 load_dotenv()
 api_key = os.getenv('BINANCE_API_KEY')
 api_secret = os.getenv('BINANCE_SECRET_KEY')
-
 
 # Initialize indicators
 bbands = BollingerBands(window=20, num_of_std=2)
 rsi_indicator = RSI(period=14)
 sup_res = SupportResistance(window=14)
 
-
 # Global DataFrame to accumulate data
 data_df = pd.DataFrame(columns=['Time', 'Open', 'High', 'Low', 'Close', 'RSI', 'UpperBB', 'MiddleBB', 'LowerBB', 'Support', 'Resistance'])
 
-# Initialize Plotly figure
-fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.2, subplot_titles=('Candlesticks with Bollinger Bands', 'RSI'))
-fig.add_trace(go.Candlestick(x=[], open=[], high=[], low=[], close=[], name='Candlesticks'), row=1, col=1)
-fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='Upper Band'), row=1, col=1)
-fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='Middle Band'), row=1, col=1)
-fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='Lower Band'), row=1, col=1)
-fig.add_trace(go.Scatter(x=[], y=[], mode='lines', name='RSI'), row=2, col=1)
-fig.update_layout(xaxis_rangeslider_visible=False, height=800)
-
-def update_plot():
-    fig.data[0].x = data_df['Time']
-    fig.data[0].open = data_df['Open']
-    fig.data[0].high = data_df['High']
-    fig.data[0].low = data_df['Low']
-    fig.data[0].close = data_df['Close']
-
-    fig.data[1].x = data_df['Time']
-    fig.data[1].y = data_df['UpperBB']
-
-    fig.data[2].x = data_df['Time']
-    fig.data[2].y = data_df['MiddleBB']
-
-    fig.data[3].x = data_df['Time']
-    fig.data[3].y = data_df['LowerBB']
-
-    fig.data[4].x = data_df['Time']
-    fig.data[4].y = data_df['RSI']
-
-    fig.show()
-
-
-#client = Client(api_key, api_secret, tld='us')
-# Function to handle incoming WebSocket messages for K-line data
 def handle_socket_message(msg):
     global data_df # Referencing global DataFrame
 
@@ -84,7 +49,7 @@ def handle_socket_message(msg):
 
     upper_band, middle_band, lower_band = bbands.update(close_price)
     support, resistance = sup_res.update(high_price, low_price)
-    
+
     new_data = {
         'Time': close_time,
         'Open': open_price,
@@ -98,10 +63,28 @@ def handle_socket_message(msg):
         'Support': support,
         'Resistance': resistance
     }
-    data_df = data_df.append(new_data, ignore_index=True)
 
+    # Efficiently append new data to DataFrame
+    data_df_length = len(data_df)
+    data_df.loc[data_df_length] = new_data
 
-    sys.stdout.flush()  # Flush output buffer
+    # Limit DataFrame size
+    max_rows = 1000
+    if data_df_length > max_rows:
+        data_df.drop(data_df.index[0], inplace=True)
+
+    # Dynamic console output
+    output = (
+        f"Candlestick Data: Open: {new_data['Open']}, High: {new_data['High']}, Low: {new_data['Low']}, Close: {new_data['Close']}\n"
+        f"RSI: {new_data['RSI']}\n"
+        f"BB Data: Upper: {new_data['UpperBB']}, Middle: {new_data['MiddleBB']}, Lower: {new_data['LowerBB']}\n"
+        f"Support: {new_data['Support']}, Resistance: {new_data['Resistance']}\n"
+    )
+
+    # Clear the console and print the output
+    sys.stdout.write("\033[H\033[J")  # Clear screen and move to home position
+    sys.stdout.write(output)
+    sys.stdout.flush()  # Ensure the print is flushed to the console
 
 # Initialize the WebSocket manager using the client
 twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret, tld='us')
@@ -117,8 +100,6 @@ try:
 except KeyboardInterrupt:
     twm.stop_socket(stream_name)
     twm.join()
+# Import the necessary module
+# ...
 
-
-"""
-ok so we have a websocket connection to stream data buuuut the variable names are all screwed up and the melatonin is kicking in so i'm gonna call it a night... or day in my case lol
-"""

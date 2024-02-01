@@ -19,7 +19,7 @@ import pandas as pd
 
 
 class BollingerBands:
-    def __init__(self, window=20, num_of_std=2):
+    def __init__(self, window=30, num_of_std=2):
         self.window = window
         self.num_of_std = num_of_std
         self.prices = []
