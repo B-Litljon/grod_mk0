@@ -2,8 +2,8 @@
 from dotenv import load_dotenv
 import os
 from utils.websocket_handler import start_websocket_stream
-
-
+from utils.indicators.bollinger_bands import BollingerBands
+from utils.indicators.rsi import RSI
 
 if __name__ == "__main__":
     load_dotenv()
