@@ -8,51 +8,50 @@ api_secret = os.getenv ('BINANCE_API_SECRET')
 
 client = Client(api_key, api_secret)
 
-# Define thresholds for RSI
-RSI_OVERSOLD = 25
-RSI_OVERBOUGHT = 75
+class TradeConfig:
+    """A class to hold configuration for trading strategy."""
+    def __init__(self, rsi_oversold=25, rsi_overbought=75, max_risk_per_trade=0.02, total_capital=1000):
+        self.rsi_oversold = rsi_oversold
+        self.rsi_overbought = rsi_overbought
+        self.max_risk_per_trade = max_risk_per_trade
+        self.total_capital = total_capital
 
-# Define your risk parameters
-MAX_RISK_PER_TRADE = 0.02  # 2% of total capital at risk per trade
-TOTAL_CAPITAL = 1000  # Total trading capital
+class TradeCalculator:
+    """A class to calculate trade sizes and make trade decisions."""
+    def __init__(self, config):
+        self.config = config
 
-# Define a function to calculate trade size based on risk and stop distance
-def calculate_trade_size(entry_price, stop_loss_price, total_capital, max_risk_per_trade, position='long'):
-    risk_per_share = entry_price - stop_loss_price if position == 'long' else stop_loss_price - entry_price
-    num_of_shares_to_buy = (total_capital * max_risk_per_trade) / risk_per_share
-    return num_of_shares_to_buy
+    def calculate_trade_size(self, entry_price, stop_loss_price, position='long'):
+        risk_per_share = entry_price - stop_loss_price if position == 'long' else stop_loss_price - entry_price
+        num_of_shares_to_buy = (self.config.total_capital * self.config.max_risk_per_trade) / risk_per_share
+        return num_of_shares_to_buy
 
-# Update the make_trade_decision function to include Bollinger Band width for determining 'power'
-def make_trade_decision(rsi_value, close_price, lower_band, middle_band, upper_band, total_capital, max_risk_per_trade, moving_average):
-    # Calculate Bollinger Band width
-    band_width = upper_band - lower_band
+    def make_trade_decision(self, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average):
+        band_width = upper_band - lower_band
+        stop_loss_long = lower_band * 0.98
+        stop_loss_short = upper_band * 1.02
+        take_profit_long = middle_band * 0.99
+        take_profit_short = middle_band * 1.01
 
-    # Define stop loss and take profit levels based on Bollinger Bands and market conditions
-    stop_loss_long = lower_band * 0.98  # 2% below the lower band for long positions
-    stop_loss_short = upper_band * 1.02  # 2% above the upper band for short positions
-    take_profit_long = middle_band * 0.99  # Slightly below the middle band for long positions
-    take_profit_short = middle_band * 1.01  # Slightly above the middle band for short positions
+        if band_width > moving_average:
+            stop_loss_long *= 1.02
+            take_profit_long *= 1.02
+        elif band_width < moving_average:
+            stop_loss_short *= 0.98
+            take_profit_short *= 0.98
 
-    # Adjust stop-loss and take-profit levels based on Bollinger Band width
-    if band_width > moving_average:  # Wide bands indicate high volatility
-        stop_loss_long *= 1.02  # Loosen stop loss in high volatility
-        take_profit_long *= 1.02  # Increase take profit in high volatility
-    elif band_width < moving_average:  # Narrow bands indicate low volatility
-        stop_loss_short *= 0.98  # Tighten stop loss in low volatility
-        take_profit_short *= 0.98  # Decrease take profit in low volatility
+        if rsi_value < self.config.rsi_oversold and close_price <= lower_band:
+            print("Buy signal triggered: RSI oversold and price near lower Bollinger Band.")
+            num_of_shares_to_buy = self.calculate_trade_size(close_price, stop_loss_long, 'long')
+            # Place buy order logic here
+            # Example: client.create_test_order(symbol='BTCUSDT', side='BUY', type='LIMIT', quantity=num_of_shares_to_buy, price=close_price)
+            return 'BUY', num_of_shares_to_buy
 
-    # Check if RSI indicates oversold and price is near the lower Bollinger Band
-    if rsi_value < RSI_OVERSOLD and close_price <= lower_band:
-        print("Buy signal triggered: RSI oversold and price near lower Bollinger Band.")
-        # Calculate the number of shares to buy
-        num_of_shares_to_buy = calculate_trade_size(close_price, stop_loss_long, total_capital, max_risk_per_trade, position='long')
-        # Place buy order logic here
-        client.create_test_order(symbol='BTCUSDT', side='BUY', type='LIMIT', quantity=num_of_shares_to_buy, price=close_price)
+        elif rsi_value > self.config.rsi_overbought and close_price >= upper_band:
+            print("Sell signal triggered: RSI overbought and price near upper Bollinger Band.")
+            shares_to_sell = self.calculate_trade_size(close_price, stop_loss_short, 'short')
+            # Place sell order logic here
+            # Example: client.create_test_order(symbol='BTCUSDT', side='SELL', type='LIMIT', quantity=shares_to_sell, price=close_price)
+            return 'SELL', shares_to_sell
 
-    # Check if RSI indicates overbought and price is near the upper Bollinger Band
-    elif rsi_value > RSI_OVERBOUGHT and close_price >= upper_band:
-        print("Sell signal triggered: RSI overbought and price near upper Bollinger Band.")
-        # Calculate the number of shares to sell
-        shares_to_sell = calculate_trade_size(close_price, stop_loss_short, total_capital, max_risk_per_trade, position='short')
-        # Place sell order logic here
-        client.create_test_order(symbol='BTCUSDT', side='SELL', type='LIMIT', quantity=shares_to_sell, price=close_price)
+        return 'HOLD', 0  # No action condition
