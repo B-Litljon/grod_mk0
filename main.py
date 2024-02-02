@@ -1,13 +1,12 @@
 # import necessary libraries and modules
-from utils import websocket_handler
-
-# websocket connection to stream data
-websocket_handler.start_websocket()
-
-# calculate indicators using the live data 
+from dotenv import load_dotenv
+import os
+from utils.websocket_handler import start_websocket_stream
 
 
-# trade logic
 
-
-# risk management 
+if __name__ == "__main__":
+    load_dotenv()
+    api_key = os.getenv('BINANCE_API_KEY')
+    api_secret = os.getenv('BINANCE_SECRET_KEY')
+    start_websocket_stream(api_key, api_secret)

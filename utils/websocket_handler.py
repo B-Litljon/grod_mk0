@@ -1,14 +1,7 @@
-from binance import Client, ThreadedWebsocketManager
-import pandas as pd
-import numpy as np
-import sys
-import os
-import time
-from dotenv import load_dotenv
-from indicators.bollinger_bands import BollingerBands
-from indicators.rsi import RSI
-from indicators.sup_res import SupportResistance
-from trade_logic import calculate_trade_size, make_trade_decision
+# Description: This file contains the function to start a WebSocket stream to listen for candlestick data from Binance.
+# The function will also calculate the Bollinger Bands, RSI, and Support/Resistance levels for the candlestick data.
+# The function will then print the data to the console and update the DataFrame with the new data.
+# The function will also include the trade logic to make trade decisions based on the calculated indicators and risk management parameters.
 
 from binance import Client, ThreadedWebsocketManager
 import pandas as pd
