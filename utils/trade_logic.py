@@ -1,3 +1,13 @@
+from binance.client import Client
+from dotenv import load_dotenv
+import os
+# Load environment variables
+load_dotenv()
+api_key = os.getenv ('BINANCE_API_KEY')
+api_secret = os.getenv ('BINANCE_API_SECRET')
+
+client = Client(api_key, api_secret)
+
 # Define thresholds for RSI
 RSI_OVERSOLD = 25
 RSI_OVERBOUGHT = 75
@@ -37,7 +47,7 @@ def make_trade_decision(rsi_value, close_price, lower_band, middle_band, upper_b
         # Calculate the number of shares to buy
         num_of_shares_to_buy = calculate_trade_size(close_price, stop_loss_long, total_capital, max_risk_per_trade, position='long')
         # Place buy order logic here
-        # client.create_order(symbol='BTCUSDT', side='BUY', type='LIMIT', quantity=num_of_shares_to_buy, price=close_price)
+        client.create_test_order(symbol='BTCUSDT', side='BUY', type='LIMIT', quantity=num_of_shares_to_buy, price=close_price)
 
     # Check if RSI indicates overbought and price is near the upper Bollinger Band
     elif rsi_value > RSI_OVERBOUGHT and close_price >= upper_band:
@@ -45,4 +55,4 @@ def make_trade_decision(rsi_value, close_price, lower_band, middle_band, upper_b
         # Calculate the number of shares to sell
         shares_to_sell = calculate_trade_size(close_price, stop_loss_short, total_capital, max_risk_per_trade, position='short')
         # Place sell order logic here
-        # client.create_order(symbol='BTCUSDT', side='SELL', type='LIMIT', quantity=shares_to_sell, price=close_price)
+        client.create_test_order(symbol='BTCUSDT', side='SELL', type='LIMIT', quantity=shares_to_sell, price=close_price)
