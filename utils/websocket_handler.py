@@ -10,9 +10,9 @@ import sys
 import os
 import time
 from dotenv import load_dotenv
-from indicators.bollinger_bands import BollingerBands
-from indicators.rsi import RSI
-from indicators.sup_res import SupportResistance
+from .indicators.bollinger_bands import BollingerBands
+from .indicators.rsi import RSI
+from .indicators.sup_res import SupportResistance
 from trade_logic import calculate_trade_size, make_trade_decision
 
 def start_websocket_stream(api_key, api_secret, symbol='BTCUSDT', interval=Client.KLINE_INTERVAL_1MINUTE):
