@@ -95,9 +95,4 @@ def start_websocket_stream(api_key, api_secret, symbol='BTCUSDT', interval=Clien
         twm.stop_socket(stream_name)
         twm.join()
 
-if __name__ == "__main__":
-    load_dotenv()
-    api_key = os.getenv('BINANCE_API_KEY')
-    api_secret = os.getenv('BINANCE_SECRET_KEY')
-    start_websocket_stream(api_key, api_secret)
 
