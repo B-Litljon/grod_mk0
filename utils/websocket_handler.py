@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from .indicators.bollinger_bands import BollingerBands
 from .indicators.rsi import RSI
 from .indicators.sup_res import SupportResistance
-from .trade_logic import calculate_trade_size, make_trade_decision
+from .trade_logic import TradeCalculator, TradeConfig
 
 def start_websocket_stream(api_key, api_secret, symbol='BTCUSDT', interval=Client.KLINE_INTERVAL_1MINUTE):
     # Initialize indicators within the function if they don't need to be accessed outside
@@ -40,7 +40,7 @@ def start_websocket_stream(api_key, api_secret, symbol='BTCUSDT', interval=Clien
         volume = float(candlestick['v'])
         close_time = pd.to_datetime(candlestick['T'], unit='ms')
         
-        # Update indicators
+        # Update indicators     
         if hasattr(bbands, 'prices') and len(bbands.prices) > 0:
             previous_close = bbands.prices[-1]
             rsi_value = rsi_indicator.update(close_price, previous_close)
