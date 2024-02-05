@@ -20,13 +20,21 @@ class TradeCalculator:
     """A class to calculate trade sizes and make trade decisions."""
     def __init__(self, config):
         self.config = config
+        self.owned_assets = {}
 
     def calculate_trade_size(self, entry_price, stop_loss_price, position='long'):
         risk_per_share = entry_price - stop_loss_price if position == 'long' else stop_loss_price - entry_price
         num_of_shares_to_buy = (self.config.total_capital * self.config.max_risk_per_trade) / risk_per_share
         return num_of_shares_to_buy
+    
+    def update_owned_assets(self, symbol, quantity, action):
+        if action == 'BUY':
+            if symbol in self.owned_assets:
+                self.owned_assets[symbol] += quantity
+            else:
+                self.owned_assets[symbol] = quantity
 
-    def make_trade_decision(self, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average):
+    def make_trade_decision(self, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average, decision):
         band_width = upper_band - lower_band
         stop_loss_long = lower_band * 0.98
         stop_loss_short = upper_band * 1.02
