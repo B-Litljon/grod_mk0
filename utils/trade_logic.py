@@ -1,6 +1,7 @@
 from binance.client import Client
 from dotenv import load_dotenv
 import os
+import asyncio
 # Load environment variables
 load_dotenv()
 api_key = os.getenv ('BINANCE_API_KEY')
@@ -33,6 +34,11 @@ class TradeCalculator:
                 self.owned_assets[symbol] += quantity
             else:
                 self.owned_assets[symbol] = quantity
+        elif action == 'SELL':
+            if symbol in self.owned_assets:
+                self.owned_assets[symbol] -= quantity
+                # Ensure the quantity doesn't go negative; adjust as needed based on your strategy
+                self.owned_assets[symbol] = max(self.owned_assets[symbol], 0)
 
     def make_trade_decision(self, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average, decision):
         band_width = upper_band - lower_band
