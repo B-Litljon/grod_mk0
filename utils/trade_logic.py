@@ -22,9 +22,10 @@ class TradeCalculator:
     def __init__(self, config):
         self.config = config
         self.owned_assets = {}
+        self.rsi_crossed_oversold = false
 
-    def calculate_trade_size(self, entry_price, stop_loss_price, position='long'):
-        risk_per_share = entry_price - stop_loss_price if position == 'long' else stop_loss_price - entry_price
+    def calculate_trade_size(self, entry_price, stop_loss_price, action):
+        risk_per_share = entry_price - stop_loss_price if action == 'BUY' else stop_loss_price - entry_price
         num_of_shares_to_buy = (self.config.total_capital * self.config.max_risk_per_trade) / risk_per_share
         return num_of_shares_to_buy
     
@@ -40,7 +41,7 @@ class TradeCalculator:
                 # Ensure the quantity doesn't go negative; adjust as needed based on your strategy
                 self.owned_assets[symbol] = max(self.owned_assets[symbol], 0)
 
-    def make_trade_decision(self, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average, decision):
+    def make_trade_decision(self, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average, action):
         band_width = upper_band - lower_band
         stop_loss_long = lower_band * 0.98
         stop_loss_short = upper_band * 1.02
