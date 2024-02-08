@@ -22,7 +22,7 @@ class TradeCalculator:
     def __init__(self, config):
         self.config = config
         self.owned_assets = {}
-        self.rsi_crossed_oversold = false
+        self.rsi_crossed_oversold = False
 
     def calculate_trade_size(self, entry_price, stop_loss_price, action):
         risk_per_share = entry_price - stop_loss_price if action == 'BUY' else stop_loss_price - entry_price
