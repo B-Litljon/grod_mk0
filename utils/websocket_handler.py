@@ -9,6 +9,7 @@ import numpy as np
 import sys
 import os
 import time
+import asyncio
 from dotenv import load_dotenv
 from .indicators.bollinger_bands import BollingerBands
 from .indicators.rsi import RSI
@@ -16,17 +17,19 @@ from .indicators.sup_res import SupportResistance
 from .trade_logic import TradeCalculator, TradeConfig
 
 class BinanceWebsocketStream:
-    def __init__(self, symbol, interval, api_key, secret_key):
+    def __init__(self, symbol, interval, api_key, api_secret):
         self.symbol = symbol
         self.interval = interval
         self.api_key = api_key
-        self.secret_key = secret_key
+        self.api_secret = api_secret
         self.bbands = BollingerBands(window= 20, stddev=2)
         self.rsi = RSI(period=14)
         self.dataframe = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.secret_key, tld='us')
+        self.tc = TradeCalculator(TradeConfig())
+        client = self.twm.client
 
-    def handle_socket_message(self, msg):
+    async def handle_socket_message(self, msg):
         print('message received')
         sys.stdout.flush()
         candle = msg['k']
@@ -35,11 +38,13 @@ class BinanceWebsocketStream:
         high_price = float(candle['h'])
         low_price = float(candle['l'])
         close_price = float(candle['c'])
-        close_time = pd.to_datetime(candle,['T'], unit='ms')
+        close_time = pd.to_datetime(candle['T'], unit='ms')
+
+        
 
         if hasattr(self.bbands, 'prices') and len (self.bbands.prices) > 0:
             previous_close = self.bbands.prices[-1]
-            rsi_value = self.rsi_indicator.update(close_price, previous_close)
+            rsi_value = self.rsi.update(close_price, previous_close)
 
         upper_band, middle_band, lower_band = self.bbands.update(close_price)
 
@@ -60,10 +65,35 @@ class BinanceWebsocketStream:
         data_df_length = len(self.dataframe)
         self.dataframe.loc[data_df_length] = new_data
 
+
+        trade_decision, quantity = await self.trade_calculator.make_trade_decision(
+            symbol=self.symbol,
+            rsi_value=rsi_value,
+            close_price=close_price,
+            lower_band=lower_band,
+            middle_band=middle_band,
+            upper_band=upper_band,
+            moving_average=None,  # You'll need to calculate or pass the moving average
+            action='BUY' if rsi_value < self.trade_calculator.config.rsi_oversold else 'SELL'
+        )
+
+        # If a trade decision is made, place the order
+        if trade_decision in ['BUY', 'SELL']:
+            asyncio.run(self.trade_calculator.place_order(
+                client=self.client,  # You'll need to have a client instance for API calls
+                symbol=self.symbol,
+                quantity=quantity,
+                price=close_price,  # Or another price depending on your strategy
+                order_type=trade_decision.lower()
+            ))
+
         # Limit DataFrame size
         max_rows = 1000
         if data_df_length > max_rows:
             self.dataframe.drop(self.dataframe.index[0], inplace=True)
+
+
+        
 
     def start(self):
         self.twm.start()
