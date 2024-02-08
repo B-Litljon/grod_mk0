@@ -66,7 +66,7 @@ class BinanceWebsocketStream:
         self.dataframe.loc[data_df_length] = new_data
 
 
-        trade_decision, quantity = await self.trade_calculator.make_trade_decision(
+        trade_decision, quantity = await self.tc.make_trade_decision(
             symbol=self.symbol,
             rsi_value=rsi_value,
             close_price=close_price,
@@ -74,12 +74,12 @@ class BinanceWebsocketStream:
             middle_band=middle_band,
             upper_band=upper_band,
             moving_average=None,  # You'll need to calculate or pass the moving average
-            action='BUY' if rsi_value < self.trade_calculator.config.rsi_oversold else 'SELL'
+            action='BUY' if rsi_value < self.tc.config.rsi_oversold else 'SELL'
         )
 
         # If a trade decision is made, place the order
         if trade_decision in ['BUY', 'SELL']:
-            asyncio.run(self.trade_calculator.place_order(
+            asyncio.run(self.tc.place_order(
                 client=self.client,  # You'll need to have a client instance for API calls
                 symbol=self.symbol,
                 quantity=quantity,
