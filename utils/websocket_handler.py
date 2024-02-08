@@ -92,12 +92,29 @@ class BinanceWebsocketStream:
         if data_df_length > max_rows:
             self.dataframe.drop(self.dataframe.index[0], inplace=True)
 
+        # Dynamic console output
+        output = (
+            f"Candlestick Data: Open: {new_data['Open']}, High: {new_data['High']}, Low: {new_data['Low']}, Close: {new_data['Close']}\n"
+            f"RSI: {new_data['RSI']}\n"
+            f"BB Data: Upper: {new_data['UpperBB']}, Middle: {new_data['MiddleBB']}, Lower: {new_data['LowerBB']}\n"
+            f"Support: {new_data['Support']}, Resistance: {new_data['Resistance']}\n"
+        )
+
+        # Clear the console and print the output
+        sys.stdout.write("\033[H\033[J")  # Clear screen and move to home position
+        sys.stdout.write(output)
+        sys.stdout.flush()  # Ensure the print is flushed to the console
+
 
         
 
     def start(self):
         self.twm.start()
-        stream_name = self.twm.start_kline_socket(symbol=self.symbol, interval=self.interval, callback=self.handle_socket_message)
+        stream_name = self.twm.start_kline_socket(
+            symbol=self.symbol, 
+            interval=self.interval, 
+            callback=lambda msg: asyncio.create_task(self.handle_socket_message(msg))
+        )
         try:
             while True:
                 time.sleep(1)
