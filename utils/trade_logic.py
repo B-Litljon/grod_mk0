@@ -41,7 +41,7 @@ class TradeCalculator:
                 # Ensure the quantity doesn't go negative; adjust as needed based on your strategy
                 self.owned_assets[symbol] = max(self.owned_assets[symbol], 0)
 
-    def make_trade_decision(self, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average, action):
+    async def make_trade_decision(self, client, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average):
         band_width = upper_band - lower_band
         stop_loss_long = lower_band * 0.98
         stop_loss_short = upper_band * 1.02
@@ -58,15 +58,43 @@ class TradeCalculator:
         if rsi_value < self.config.rsi_oversold and close_price <= lower_band:
             print("Buy signal triggered: RSI oversold and price near lower Bollinger Band.")
             num_of_shares_to_buy = self.calculate_trade_size(close_price, stop_loss_long, 'long')
-            # Place buy order logic here
-            # Example: client.create_test_order(symbol='BTCUSDT', side='BUY', type='LIMIT', quantity=num_of_shares_to_buy, price=close_price)
-            return 'BUY', num_of_shares_to_buy
+            # Call place_order to place a buy order
+            order_result = await self.place_order(client, symbol, num_of_shares_to_buy, close_price, 'buy')
+            return order_result
 
         elif rsi_value > self.config.rsi_overbought and close_price >= upper_band:
             print("Sell signal triggered: RSI overbought and price near upper Bollinger Band.")
             shares_to_sell = self.calculate_trade_size(close_price, stop_loss_short, 'short')
-            # Place sell order logic here
-            # Example: client.create_test_order(symbol='BTCUSDT', side='SELL', type='LIMIT', quantity=shares_to_sell, price=close_price)
-            return 'SELL', shares_to_sell
+            # Call place_order to place a sell order
+            order_result = await self.place_order(client, symbol, shares_to_sell, close_price, 'sell')
+            return order_result
 
         return 'HOLD', 0  # No action condition
+    
+    async def place_order(self, client, symbol, quantity, price, order_type):
+        """
+        Asynchronously places a limit buy or sell order.
+
+        :param client: The API client instance.
+        :param symbol: The symbol to trade.
+        :param quantity: The quantity to trade.
+        :param price: The price at which to execute the order.
+        :param order_type: 'buy' or 'sell' to determine the type of order.
+        :return: The result of the order.
+        """
+        if order_type == 'buy':
+            order = await client.order_limit_buy(
+                symbol=symbol,
+                quantity=quantity,
+                price=price
+            )
+        elif order_type == 'sell':
+            order = await client.order_limit_sell(
+                symbol=symbol,
+                quantity=quantity,
+                price=price
+            )
+        else:
+            raise ValueError("Invalid order type specified. Must be 'buy' or 'sell'.")
+
+        return order
