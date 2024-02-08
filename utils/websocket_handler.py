@@ -22,12 +22,12 @@ class BinanceWebsocketStream:
         self.interval = interval
         self.api_key = api_key
         self.api_secret = api_secret
-        self.bbands = BollingerBands(window= 20, stddev=2)
+        self.bbands = BollingerBands(window= 20, num_of_std=2)
         self.rsi = RSI(period=14)
         self.dataframe = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
-        self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.secret_key, tld='us')
+        self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
         self.tc = TradeCalculator(TradeConfig())
-        client = self.twm.client
+        self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
 
     async def handle_socket_message(self, msg):
         print('message received')
