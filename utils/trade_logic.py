@@ -41,7 +41,7 @@ class TradeCalculator:
                 # Ensure the quantity doesn't go negative; adjust as needed based on your strategy
                 self.owned_assets[symbol] = max(self.owned_assets[symbol], 0)
 
-    async def make_trade_decision(self, client, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average):
+    async def make_trade_decision(self, client, symbol, rsi_value, close_price, lower_band, middle_band, upper_band, moving_average, action):
         band_width = upper_band - lower_band
         stop_loss_long = lower_band * 0.98
         stop_loss_short = upper_band * 1.02
@@ -57,7 +57,7 @@ class TradeCalculator:
 
         if rsi_value < self.config.rsi_oversold and close_price <= lower_band:
             print("Buy signal triggered: RSI oversold and price near lower Bollinger Band.")
-            num_of_shares_to_buy = self.calculate_trade_size(close_price, stop_loss_long, 'long')
+            num_of_shares_to_buy = self.calculate_trade_size(close_price, stop_loss_long, action='long')
             # Call place_order to place a buy order
             order_result = await self.place_order(client, symbol, num_of_shares_to_buy, close_price, 'buy')
             return order_result
