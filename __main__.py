@@ -10,7 +10,7 @@ if __name__ == "__main__":
     api_key = os.getenv('BINANCE_API_KEY')
     api_secret = os.getenv('BINANCE_SECRET_KEY')
     symbol = input("Enter the symbol you want to trade: ").lower() + 'USDT'
-    interval = input("Enter the interval you want to trade: ").lower()
+    interval = '1M'#input("Enter the interval you want to trade: ").lower()
     
     # Create an instance of BinanceWebsocketStream without using curly braces
     stream = BinanceWebsocketStream(symbol, interval, api_key, api_secret)
