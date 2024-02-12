@@ -72,16 +72,7 @@ class TradeCalculator:
         return 'HOLD', 0  # No action condition
     
     async def place_order(self, client, symbol, quantity, price, order_type):
-        """
-        Asynchronously places a limit buy or sell order.
-
-        :param client: The API client instance.
-        :param symbol: The symbol to trade.
-        :param quantity: The quantity to trade.
-        :param price: The price at which to execute the order.
-        :param order_type: 'buy' or 'sell' to determine the type of order.
-        :return: The result of the order.
-        """
+        
         if order_type == 'buy':
             order = await client.order_limit_buy(
                 symbol=symbol,

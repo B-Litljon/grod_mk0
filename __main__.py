@@ -1,7 +1,7 @@
 # import necessary libraries and modules
 from dotenv import load_dotenv
 import os
-from utils.websocket_handler import BinanceWebsocketStream
+from utils.feeder.websocket_handler import BinanceWebsocketStream
 from utils.indicators.bollinger_bands import BollingerBands
 from utils.indicators.rsi import RSI
 
