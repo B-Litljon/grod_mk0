@@ -67,7 +67,7 @@ class BinanceWebsocketStream:
         stream_name = self.twm.start_kline_socket(
             symbol=self.symbol, 
             interval=self.interval, 
-            callback=lambda msg: asyncio.create_task(self.handle_socket_message(msg))
+            callback=self.handle_socket_message
         )
         try:
             while True:
