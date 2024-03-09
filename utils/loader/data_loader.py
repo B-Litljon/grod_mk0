@@ -62,6 +62,10 @@ class BinanceWebsocketStream:
         if data_df_length > max_rows:
             self.dataframe.drop(self.dataframe.index[0], inplace=True)
 
+
+       # Trade logic
+       
+
     def start(self):
         self.twm.start()
         stream_name = self.twm.start_kline_socket(

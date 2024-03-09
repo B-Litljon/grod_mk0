@@ -44,6 +44,28 @@ class OrderCalculator:
             'EntryPrice': entry_price,
             'Quantity': quantity
         }
+
+    def place_order(self, symbol, order_type, quantity, price):
+        try:
+            if order_type == 'buy':
+                order = client.create_order(
+                    symbol=symbol,
+                    side=Client.SIDE_BUY,
+                    type=Client.ORDER_TYPE_MARKET,
+                    quantity=quantity
+                )
+                print(order)
+            elif order_type == 'sell':
+                order = client.create_order(
+                    symbol=symbol,
+                    side=Client.SIDE_SELL,
+                    type=Client.ORDER_TYPE_MARKET,
+                    quantity=quantity
+                )
+                print(order)
+        except Exception as e:
+            print(e)
+            return None
         
 
     
