@@ -21,6 +21,17 @@ class BollingerBands:
         
         upper_band = self.mean + (self.std_dev * self.num_of_std)
         lower_band = self.mean - (self.std_dev * self.num_of_std)
+        band_width = upper_band - lower_band
+
+        self.upper_bands.append(upper_band)
+        self.middle_bands.append(self.mean)
+        self.lower_bands.append(lower_band)
+        self.band_widths.append(band_width)
         
         return upper_band, self.mean, lower_band
     
+    def calculate_rolling_average_bandwidth(self, rolling_window=5):
+        if len(self.bandwidths) < rolling_window:
+            return None 
+        rolling_avg = pd.Series(self.bandwidths).rolling(window=rolling_window).mean().iloc[-1]
+        return rolling_avg

@@ -86,7 +86,8 @@ class BinanceWebsocketStream:
         latest_bandwidth = latest_upper_bb - latest_lower_bb
         bb_expanded = (latest_bandwidth - previous_bandwidth) / previous_bandwidth >= 0.15
 
-
+        # adding logic to get the rolling average of the upper and lower bollinger bands to more accurately gauge the expansion or contraction of the bands
+        # more specifically adding a new method to my bolinger bands class to calculate the rolling average of the upper and lower bands
         if rsi_normal and bb_expanded:
             print('Buy Signal')
             latest_data = self.dataframe.iloc[-1].to_dict()
