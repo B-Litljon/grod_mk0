@@ -72,19 +72,19 @@ class BinanceWebsocketStream:
         
         latest_rsi = self.dataframe['RSI'].iloc[-1]
         #latest_close = self.dataframe['Close'].iloc[-1]
-        rsi_normal = latest_rsi > 25 and latest_rsi <= 60 
+        rsi_normal = latest_rsi > 30 and latest_rsi <= 60 
 
         latest_upper_bb = self.dataframe['UpperBB'].iloc[-1]
         latest_lower_bb = self.dataframe['LowerBB'].iloc[-1]
         latest_bb_moving_average = self.dataframe['MiddleBB'].iloc[-1] # moving average added to determine if the bollinger bands are expanding or contracting bullish or bearish in relation to the current price
-        previous_upper_bb = self.dataframe['UpperBB'].iloc[-2]
+        previous_upper_bb = self.dataframe['UpperBB'].iloc[-2] 
         previous_lower_bb = self.dataframe['LowerBB'].iloc[-2]
         previous_bb_moving_average = self.dataframe['MiddleBB'].iloc[-2]
         
         # check if the bollinger bands are expanding or contracting
         previous_bandwidth = previous_upper_bb - previous_lower_bb
         latest_bandwidth = latest_upper_bb - latest_lower_bb
-        bb_expanded = (current_bandwidth - previous_bandwidth) / previous_bandwidth >= 0.15
+        bb_expanded = (latest_bandwidth - previous_bandwidth) / previous_bandwidth >= 0.15
 
 
         if rsi_normal and bb_expanded:
@@ -95,7 +95,7 @@ class BinanceWebsocketStream:
             # place order
             # update trade history
             # updat usdt balance
-            
+
         
         
         
