@@ -54,16 +54,51 @@ class BinanceWebsocketStream:
             'LowerBB': lower_band
         }
         
-        # Efficiently append new data to DataFrame
+        # append new data to DataFrame
         data_df_length = len(self.dataframe)
         self.dataframe.loc[data_df_length] = new_data
+
+        self.check_signal()
+
         # Limit DataFrame size
         max_rows = 1000
         if data_df_length > max_rows:
             self.dataframe.drop(self.dataframe.index[0], inplace=True)
 
 
-       # Trade logic
+    def check_signal(self):
+        if len(self.dataframe) < 20:
+            return
+        
+        latest_rsi = self.dataframe['RSI'].iloc[-1]
+        #latest_close = self.dataframe['Close'].iloc[-1]
+        rsi_normal = latest_rsi > 25 and latest_rsi <= 60 
+
+        latest_upper_bb = self.dataframe['UpperBB'].iloc[-1]
+        latest_lower_bb = self.dataframe['LowerBB'].iloc[-1]
+        latest_bb_moving_average = self.dataframe['MiddleBB'].iloc[-1] # moving average added to determine if the bollinger bands are expanding or contracting bullish or bearish in relation to the current price
+        previous_upper_bb = self.dataframe['UpperBB'].iloc[-2]
+        previous_lower_bb = self.dataframe['LowerBB'].iloc[-2]
+        previous_bb_moving_average = self.dataframe['MiddleBB'].iloc[-2]
+        
+        # check if the bollinger bands are expanding or contracting
+        previous_bandwidth = previous_upper_bb - previous_lower_bb
+        latest_bandwidth = latest_upper_bb - latest_lower_bb
+        bb_expanded = (current_bandwidth - previous_bandwidth) / previous_bandwidth >= 0.15
+
+
+        if rsi_normal and bb_expanded:
+            print('Buy Signal')
+            latest_data = self.dataframe.iloc[-1].to_dict()
+            self.tc.place_order(latest_data)# place order
+            # calculate order size      
+            # place order
+            # update trade history
+            # updat usdt balance
+            
+        
+        
+        
        
 
     def start(self):
