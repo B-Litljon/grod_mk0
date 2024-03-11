@@ -76,10 +76,10 @@ class BinanceWebsocketStream:
 
         latest_upper_bb = self.dataframe['UpperBB'].iloc[-1]
         latest_lower_bb = self.dataframe['LowerBB'].iloc[-1]
-        latest_bb_moving_average = self.dataframe['MiddleBB'].iloc[-1] # moving average added to determine if the bollinger bands are expanding or contracting bullish or bearish in relation to the current price
+        latest_middle_bb = self.dataframe['MiddleBB'].iloc[-1] # moving average added to determine if the bollinger bands are expanding or contracting bullish or bearish in relation to the current price
         previous_upper_bb = self.dataframe['UpperBB'].iloc[-2] 
         previous_lower_bb = self.dataframe['LowerBB'].iloc[-2]
-        previous_bb_moving_average = self.dataframe['MiddleBB'].iloc[-2]
+        previous_middle_bb = self.dataframe['MiddleBB'].iloc[-2]
         
         # check if the bollinger bands are expanding or contracting
         previous_bandwidth = previous_upper_bb - previous_lower_bb
