@@ -26,6 +26,42 @@ class BinanceWebsocketStream:
         self.tc = TradeCalculator(TradeConfig())
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
 
+    def fetch_historical_data(self):
+        print('Fetching historical data...')
+        klines = self.client.get_historical_klines(self.symbol, self.interval, limit=100)
+        for kline in klines:
+            open_time = pd.to_datetime(kline[0], unit='ms')
+            open_price = float(kline[1])
+            high_price = float(kline[2])
+            low_price = float(kline[3])
+            close_price = float(kline[4])
+            volume = float(kline[5])
+            close_time = pd.to_datetime(kline[6], unit='ms')
+
+            rsi_value = None
+            if len(self.rsi.prices) > 0:
+                previous_close = self.rsi.prices[-1]
+                rsi_value = self.rsi.update(close_price, previous_close)
+
+            upper_band, middle_band, lower_band = self.bbands.update(close_price)
+
+            new_data = {
+                'Time': close_time,
+                'Open': open_price,
+                'High': high_price,
+                'Low': low_price,
+                'Close': close_price,
+                'RSI': rsi_value if rsi_value is not None else np.nan,
+                'UpperBB': upper_band,
+                'MiddleBB': middle_band,
+                'LowerBB': lower_band
+            }
+
+            data_df_length = len(self.dataframe)
+            self.dataframe.loc[data_df_length] = new_data
+
+        print('Historical data loaded.')
+
     def handle_socket_message(self, msg):
         print('message received')
         candle = msg['k']
