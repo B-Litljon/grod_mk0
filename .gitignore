@@ -1,3 +1,4 @@
 grodmk0venv
 .env
 __pycache__
+scratch.py
