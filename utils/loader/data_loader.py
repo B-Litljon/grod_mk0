@@ -58,7 +58,7 @@ class BinanceWebsocketStream:
         data_df_length = len(self.dataframe)
         self.dataframe.loc[data_df_length] = new_data
 
-        self.check_signal()
+        self.check_signal() 
 
         # Limit DataFrame size
         max_rows = 1000
@@ -71,23 +71,29 @@ class BinanceWebsocketStream:
             return
         
         latest_rsi = self.dataframe['RSI'].iloc[-1]
-        #latest_close = self.dataframe['Close'].iloc[-1]
+        latest_close = self.dataframe['Close'].iloc[-1]
         rsi_normal = latest_rsi > 30 and latest_rsi <= 60 
 
         latest_upper_bb = self.dataframe['UpperBB'].iloc[-1]
         latest_lower_bb = self.dataframe['LowerBB'].iloc[-1]
-        latest_middle_bb = self.dataframe['MiddleBB'].iloc[-1] # moving average added to determine if the bollinger bands are expanding or contracting bullish or bearish in relation to the current price
+        latest_moving_avg = self.dataframe['MiddleBB'].iloc[-1] # moving average added to determine if the bollinger bands are expanding or contracting bullish or bearish in relation to the current price
         previous_upper_bb = self.dataframe['UpperBB'].iloc[-2] 
         previous_lower_bb = self.dataframe['LowerBB'].iloc[-2]
-        previous_middle_bb = self.dataframe['MiddleBB'].iloc[-2]
+        previous_moving_avg = self.dataframe['MiddleBB'].iloc[-2]
         
         # check if the bollinger bands are expanding or contracting
         previous_bandwidth = previous_upper_bb - previous_lower_bb
         latest_bandwidth = latest_upper_bb - latest_lower_bb
         bb_expanded = (latest_bandwidth - previous_bandwidth) / previous_bandwidth >= 0.15
 
-        # adding logic to get the rolling average of the upper and lower bollinger bands to more accurately gauge the expansion or contraction of the bands
-        # more specifically adding a new method to my bolinger bands class to calculate the rolling average of the upper and lower bands
+        # I wrote a method to calculate the rolling average of the bandwidth as well as rate of change 
+        # we need to do some minor tweaks and then incorporate that into this wss class 
+        # also we need to include logic into this function to request enough data
+        # so that the rsi and the bbands can start off with a calculation.
+        # ideally we should request enough data to fill 100 rows of the df, 
+        # then we can run the calculation and start the ws stream right after  #
+
+
         if rsi_normal and bb_expanded:
             print('Buy Signal')
             latest_data = self.dataframe.iloc[-1].to_dict()

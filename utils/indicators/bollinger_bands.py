@@ -33,13 +33,14 @@ class BollingerBands:
     # note: you can utilize this method using different periods to make a mini bollinger band for the upper and lower bands to aid in spotting trends in the data 
     # basically using it to determine areas of support and resistance in your upper and lower bands # 
     
+    # gets the averge of the band width over a period of time
     def calculate_rolling_average_bandwidth(self, rolling_window=5):
         if len(self.bandwidths) < rolling_window:
             return None 
         rolling_avg = pd.Series(self.bandwidths).rolling(window=rolling_window).mean().iloc[-1]
         return rolling_avg
-    
-    def calculate_bandwidth_roc(self, period=2):  # rate of change of the bandwidth
+    # gets the rate of change of the bandwidth 
+    def calculate_bandwidth_roc(self, period=2):  # rate of change of the bandwidth, checks the last two data points for the calculation
         if len(self.bandwidths) >= period:
             return (self.bandwidths[-1] - self.bandwidths[-period]) / self.bandwidths[-period]
         else:
