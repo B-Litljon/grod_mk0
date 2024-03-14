@@ -24,5 +24,24 @@ class RSI:
         rsi = 100 - (100 / (1 + rs))
         
         return rsi
+    
+    def check_divergence(self, price):
+        if len(self.prices) < 2:
+            return None
+        
+        current_price = price
+        previous_price = self.prices[-1]
+        current_rsi = self.rsi_values[-1]
+        previus_rsi = self.rsi_values[-2]
 
+        if current_price > previous_price and current_rsi < previus_rsi:
+            return 'bullish divergence' # signals the price is not following the rsi and is likely to reverse away from the bull trend short term
+        elif current_price < previous_price and current_rsi > previus_rsi:
+            return 'bearish divergence' 
+        else:
+            return None
 
+# add logic to calculate divergence between the rsi and the price
+# rsi crossover generate signals if the rsi crosses over the 30 or 70 line
+# rsi trend eg: if the rsi is consistently above 50 for a while that could mean bullish trend or vice versa
+# rsi smoothing, common smoothing teks include sma or exponential moving average    

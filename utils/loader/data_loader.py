@@ -140,9 +140,6 @@ class BinanceWebsocketStream:
             # updat usdt balance
 
         
-        
-        
-       
 
     def start(self):
         self.twm.start()
@@ -150,7 +147,7 @@ class BinanceWebsocketStream:
             symbol=self.symbol, 
             interval=self.interval, 
             callback=self.handle_socket_message
-        )
+        ) # need to call fetch historical data here to fill the dataframe b4 the ws stream starts
         try:
             while True:
                 time.sleep(1)
