@@ -32,11 +32,11 @@ class RSI:
         current_price = price
         previous_price = self.prices[-1]
         current_rsi = self.rsi_values[-1]
-        previus_rsi = self.rsi_values[-2]
+        previous_rsi = self.rsi_values[-2]
 
-        if current_price > previous_price and current_rsi < previus_rsi:
+        if current_price > previous_price and current_rsi < previous_rsi:
             return 'bullish divergence' # signals the price is not following the rsi and is likely to reverse away from the bull trend short term
-        elif current_price < previous_price and current_rsi > previus_rsi:
+        elif current_price < previous_price and current_rsi > previous_rsi:
             return 'bearish divergence' 
         else:
             return None
