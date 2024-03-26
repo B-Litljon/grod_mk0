@@ -8,8 +8,8 @@
 
 ## Update Order Placement
 
-- Modify the `place_order` method to generate unique order IDs []
-- Update the `place_order` method to store order details in a dictionary []
+- Modify the `place_order` method to generate unique order IDs [X]
+- Update the `place_order` method to store order details in a dictionary [X]
 
 ## Implement Database Persistence
 

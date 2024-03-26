@@ -2,6 +2,8 @@ from binance.client import Client
 from dotenv import load_dotenv
 import os
 import pandas as pd
+import time
+import uuid
 # Load environment variables
 load_dotenv()
 api_key = os.getenv ('BINANCE_API_KEY')
@@ -89,6 +91,7 @@ Note: The `place_order` method requires a properly configured Binance client API
     def __init__(self, initial_usdt_balance, risk_per_trade=0.01):
         self.usdt_balance = initial_usdt_balance # needs to get the actual usdt balance from the account since the algo will only use usdt to place orders
         self.risk_per_trade = risk_per_trade
+        self.active_orders = {}
     # Calculate the size of the order to place for added safety
     def calculate_order_size(self, entry_price, stop_loss_price):
         risk_per_trade_amt = self.usdt_balance * self.risk_per_trade
@@ -108,12 +111,16 @@ Note: The `place_order` method requires a properly configured Binance client API
     # and handle the case where the order is not placed successfully for various reasons
     def place_order(self, symbol, order_type, quantity, price):
         try:
+            # Generate a unique order ID
+            order_id = f"{int(time.time() * 1000)}_{symbol}_{uuid.uuid4().hex}"
+
             if order_type == 'buy':
                 order = client.create_order(
                     symbol=symbol,
                     side=Client.SIDE_BUY,
                     type=Client.ORDER_TYPE_MARKET,
-                    quantity=quantity
+                    quantity=quantity,
+                    newClientOrderId=order_id
                 )
                 print(order)
             elif order_type == 'sell':
@@ -121,12 +128,23 @@ Note: The `place_order` method requires a properly configured Binance client API
                     symbol=symbol,
                     side=Client.SIDE_SELL,
                     type=Client.ORDER_TYPE_MARKET,
-                    quantity=quantity
+                    quantity=quantity,
+                    newClientOrderId=order_id
                 )
                 print(order)
+
+            # Store the order details in the in-memory dictionary
+            self.active_orders[order_id] = {
+                'timestamp': int(time.time() * 1000),
+                'symbol': symbol,
+                'type': order_type,
+                'price': price,
+                'quantity': quantity,
+                'status': 'NEW'
+            }
+
+            return order_id
+
         except Exception as e:
             print(e)
             return None
-        
-
-    
