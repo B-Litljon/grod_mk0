@@ -1,5 +1,26 @@
 
 class EngulfingPatternDetector:
+    """
+A class for detecting bullish and bearish engulfing candlestick patterns in a given DataFrame.
+
+Instantiate the class by creating an instance of EngulfingPatternDetector:
+    detector = EngulfingPatternDetector(dataframe)
+
+Args:
+    dataframe (pandas.DataFrame): A DataFrame containing candlestick data with columns 'Open' and 'Close'.
+
+The class provides methods to check for the presence of bullish and bearish engulfing patterns in the last two candles of the DataFrame.
+
+To check for a bullish engulfing pattern:
+    is_bullish = detector.is_bullish_engulfing()
+
+To check for a bearish engulfing pattern:
+    is_bearish = detector.is_bearish_engulfing()
+
+The methods return a boolean value indicating whether the respective engulfing pattern is present (True) or not (False).
+
+Note: The DataFrame must contain at least two rows of data for the engulfing pattern detection to work.
+"""
     def __init__(self, dataframe):
         self.dataframe = dataframe
 

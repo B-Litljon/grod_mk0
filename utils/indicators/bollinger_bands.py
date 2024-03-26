@@ -3,6 +3,26 @@ import pandas as pd
 
 
 class BollingerBands:
+    """
+A class for calculating and updating Bollinger Bands.
+
+Instantiate the class by creating an instance of BollingerBands:
+    bollinger_bands = BollingerBands(window=20, num_of_std=2)
+
+Args:
+    window (int): The rolling window size for calculating the moving average and standard deviation. Default is 30.
+    num_of_std (int): The number of standard deviations to use for the upper and lower bands. Default is 2.
+
+The class provides methods to update the Bollinger Bands with new price data and calculate the rate of change (ROC) of the average bandwidth.
+
+To update the Bollinger Bands with a new price:
+    upper_band, middle_band, lower_band = bollinger_bands.update(new_price)
+
+To calculate the ROC of the average bandwidth:
+    roc = bollinger_bands.calculate_bandwidth_roc(rolling_window=5, period=2)
+
+Note: The class requires a sufficient amount of price data to calculate the Bollinger Bands accurately. The bands will not be calculated until the window is filled with data.
+"""
     def __init__(self, window=30, num_of_std=2):
         self.window = window
         self.num_of_std = num_of_std
