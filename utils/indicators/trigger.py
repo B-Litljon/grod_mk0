@@ -2,6 +2,24 @@ from bollinger_bands import BollingerBands
 from rsi import RSI
 
 class Triggers:
+    """
+    The Triggers class is designed to implement trading strategies based on technical analysis indicators such as Bollinger Bands and RSI (Relative Strength Index).
+    It provides methods to check for specific market conditions like RSI divergence, bullish engulfing patterns, and a combined strategy involving RSI and Bollinger Band expansion.
+
+    Attributes:
+        bollinger_bands (BollingerBands): An instance of a BollingerBands class containing the upper, middle, and lower bands.
+        rsi_values (list): A list of RSI values.
+        price_data (list): A list of dictionaries containing price data with keys 'open', 'close', 'high', and 'low'.
+        stage_one_triggered (bool): A flag to indicate if the first stage of the rsi_and_bb_expansion_strategy has been triggered.
+
+    Methods:
+        rsi_divergence_strategy: To be implemented for RSI divergence strategy.
+        is_bullish_engulfing: Checks for a bullish engulfing pattern in the latest two candles.
+        rsi_and_bb_expansion_strategy: Checks for a trading signal based on RSI values, Bollinger Band expansion, and bullish engulfing pattern.
+
+    To properly instantiate this class, provide it with the current Bollinger Bands, RSI values, and price data like so:
+    triggers_instance = Triggers(bollinger_bands_instance, rsi_values_list, price_data_list)
+    """
     def __init__(self, bollinger_bands, rsi_values, price_data):
         self.bollinger_bands = bollinger_bands
         self.rsi_values = rsi_values
