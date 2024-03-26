@@ -1,29 +1,44 @@
-# Project Notes: Async Implementation for Trading Algorithm
-# 2/5/24
-## Key Decision
-Employing async/await in your trading algorithm is recommended to handle multiple asset streaming and concurrent order placement efficiently.
+# Trading Bot Development Checklist
 
-## Refactoring Steps
+## Integrate Trigger Conditions
 
-### Make start_websocket_stream asynchronous
-1. Utilize `async def` declaration.
-2. Initialize BinanceSocketManager asynchronously using `async with`.
-3. Spawn concurrent tasks for each asset stream with `asyncio.create_task`.
-4. Wait for all tasks to complete with `asyncio.gather`.
+- Import the Triggers class [X]
+- Create an instance of the Triggers class [X]
+- Modify the `check_signal` method to use the `rsi_and_bb_expansion_strategy` [X]
 
-### Make handle_socket_message asynchronous
-1. Use `async for` to iterate through stream messages.
-2. Call your trade calculator logic asynchronously (`place_order`) upon a trade decision.
+## Update Order Placement
 
-### Implement asynchronous order placement
-1. Use an async-compatible Binance API client (e.g., aiohttp-binance) with `async with`.
-2. Place market orders asynchronously using `await client.create_order`.
+- Modify the `place_order` method to generate unique order IDs []
+- Update the `place_order` method to store order details in a dictionary []
 
-## Additional Notes
-- Thoroughly test your modified code due to the complexities of asynchronous programming.
-- Implement error handling and rate limiting for a robust trading system.
-- Continuously evaluate your strategy and performance metrics for adjustments.
+## Implement Database Persistence
 
-## Resources
-- aiohttp-binance documentation: <invalid URL removed>
-- Asynchronous Python guide: https://docs.python.org/3/library/asyncio.html
+- Create a `DatabaseHandler` class to manage database operations []
+- Implement methods to create tables and insert order data []
+- Call `DatabaseHandler` method to store order details after selling []
+
+## Error Handling and Logging
+
+- Import the logging module []
+- Set up a logger with appropriate levels []
+- Add log statements throughout your code []
+- Implement error handling using try-except blocks []
+
+## Update Order Management
+
+- Modify the `sell_order` method to retrieve order details []
+- Calculate profit/loss and duration based on stored order details []
+- Update order status in the dictionary to "complete" []
+- Call `DatabaseHandler` method to store completed order details []
+
+## Integration and Testing
+
+- Integrate all updated components into your `BinanceWebsocketStream` class []
+- Test your bot with a small amount of capital or in paper trading []
+- Monitor logs and database to verify order functionality []
+
+## Multiple Currency Support (Future Enhancement)
+
+- Refactor code to allow multiple `BinanceWebsocketStream` instances []
+- Modify the `start` method to accept currency pair parameters []
+- Create instances for each desired currency pair and start them simultaneously []
