@@ -44,7 +44,8 @@ class OrderCalculator:
             'EntryPrice': entry_price,
             'Quantity': quantity
         }
-
+    # need to implement proper error handling using the logging module
+    # and handle the case where the order is not placed successfully for various reasons
     def place_order(self, symbol, order_type, quantity, price):
         try:
             if order_type == 'buy':

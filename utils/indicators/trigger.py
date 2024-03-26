@@ -1,3 +1,6 @@
+from bollinger_bands import BollingerBands
+from rsi import RSI
+
 class Triggers:
     def __init__(self, bollinger_bands, rsi_values, price_data):
         self.bollinger_bands = bollinger_bands
@@ -33,10 +36,11 @@ class Triggers:
 
         # Stage 2: Check if RSI is back in the normal range, Bollinger Bands are expanding, and bullish engulfing pattern
         if self.stage_one_triggered:
-            if self.rsi_values[-1] >= 30 and self.rsi_values[-1] < 35:
-                current_bandwidth = self.bollinger_bands.band_widths[-1]
-                rolling_avg_bandwidth = self.bollinger_bands.calculate_rolling_average_bandwidth()
-                if current_bandwidth > rolling_avg_bandwidth * 1.15:  # Example of 15% expansion
+            if 30 <= self.rsi_values[-1] < 35:
+                # Utilize the calculate_bandwidth_roc method to check for Bollinger Bands expansion
+                # Assuming a positive ROC indicates expansion. Adjust the threshold as needed.
+                bandwidth_roc = self.bollinger_bands.calculate_bandwidth_roc()
+                if bandwidth_roc is not None and bandwidth_roc > 0.15:  # Example threshold for ROC
                     if self.is_bullish_engulfing():
                         self.stage_one_triggered = False  # Reset stage one trigger
                         return True
