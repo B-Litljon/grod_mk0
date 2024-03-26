@@ -11,6 +11,7 @@ import time
 from dotenv import load_dotenv
 from ..indicators.bollinger_bands import BollingerBands
 from ..indicators.rsi import RSI
+from ..indicators.trigger import Trigger as trgr
 from ..safety.order_calculation import TradeCalculator, TradeConfig
 
 class BinanceWebsocketStream:
@@ -23,7 +24,7 @@ class BinanceWebsocketStream:
         self.rsi = RSI(period=14)
         self.dataframe = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.tc = TradeCalculator(TradeConfig())
+        self.tc = TradeCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'TradeCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
 
     def fetch_historical_data(self):
@@ -103,41 +104,12 @@ class BinanceWebsocketStream:
 
 
     def check_signal(self):
-        if len(self.dataframe) < 20:
-            return
-        
-        latest_rsi = self.dataframe['RSI'].iloc[-1]
-        latest_close = self.dataframe['Close'].iloc[-1]
-        rsi_normal = latest_rsi > 30 and latest_rsi <= 60 
-
-        latest_upper_bb = self.dataframe['UpperBB'].iloc[-1]
-        latest_lower_bb = self.dataframe['LowerBB'].iloc[-1]
-        latest_moving_avg = self.dataframe['MiddleBB'].iloc[-1] # moving average added to determine if the bollinger bands are expanding or contracting bullish or bearish in relation to the current price
-        previous_upper_bb = self.dataframe['UpperBB'].iloc[-2] 
-        previous_lower_bb = self.dataframe['LowerBB'].iloc[-2]
-        previous_moving_avg = self.dataframe['MiddleBB'].iloc[-2]
-        
-        # check if the bollinger bands are expanding or contracting
-        previous_bandwidth = previous_upper_bb - previous_lower_bb
-        latest_bandwidth = latest_upper_bb - latest_lower_bb
-        bb_expanded = (latest_bandwidth - previous_bandwidth) / previous_bandwidth >= 0.15
-
-        # I wrote a method to calculate the rolling average of the bandwidth as well as rate of change 
-        # we need to do some minor tweaks and then incorporate that into this wss class 
-        # also we need to include logic into this function to request enough data
-        # so that the rsi and the bbands can start off with a calculation.
-        # ideally we should request enough data to fill 100 rows of the df, 
-        # then we can run the calculation and start the ws stream right after  #
-
-
-        if rsi_normal and bb_expanded:
-            print('Buy Signal')
-            latest_data = self.dataframe.iloc[-1].to_dict()
-            self.tc.place_order(latest_data)# place order
-            # calculate order size      
-            # place order
-            # update trade history
-            # updat usdt balance
+        if trgr.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, self.dataframe):
+            print('Signal detected')
+            # self.tc.calculate_order_size()
+            # self.tc.calculate_stop_loss()
+            # self.tc.calculate_take_profit()
+            # self.tc.calculate_risk_reward_ratio
 
         
 

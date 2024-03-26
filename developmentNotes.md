@@ -1,66 +1,44 @@
-# Trading Strategy
+# Trading Bot Development Checklist
 
-## Indicators
+## Integrate Trigger Conditions
 
-- [ ] Bollinger Bands (Energy powering price movements)
-  - [ ] Calculate upper, middle, and lower bands based on price data
-  - [ ] Implement methods to calculate rolling average bandwidth and rate of change of bandwidth
-  - [ ] Use different periods to create mini Bollinger Bands for upper and lower bands to identify support/resistance levels
+- Import the Triggers class [X]
+- Create an instance of the Triggers class [X]
+- Modify the `check_signal` method to use the `rsi_and_bb_expansion_strategy` [X]
 
-- [ ] RSI (Direction of the firearm)
-  - [ ] Use RSI to determine the direction of price movement
-  - [ ] Wait for RSI to return to normal range (e.g., 35-40) after being oversold (e.g., below 25)
+## Update Order Placement
 
-## Buy Signal
+- Modify the `place_order` method to generate unique order IDs []
+- Update the `place_order` method to store order details in a dictionary []
 
-- [ ] Generate buy signal when:
-  - [ ] RSI is back within the normal range
-  - [ ] Bollinger Bands are expanding significantly based on defined criteria
+## Implement Database Persistence
 
-## Order Placement
+- Create a `DatabaseHandler` class to manage database operations []
+- Implement methods to create tables and insert order data []
+- Call `DatabaseHandler` method to store order details after selling []
 
-- [ ] Use `OrderCalculator` class to calculate order size based on risk management parameters
-- [ ] Call `place_order` method to execute buy order on the exchange
+## Error Handling and Logging
 
-## Risk Management
+- Import the logging module []
+- Set up a logger with appropriate levels []
+- Add log statements throughout your code []
+- Implement error handling using try-except blocks []
 
-- [ ] Use `TradeConfig` class to hold trading strategy configuration
-  - [ ] Define RSI oversold/overbought levels
-  - [ ] Set maximum risk per trade
-  - [ ] Set total capital
+## Update Order Management
 
-- [ ] Use `OrderCalculator` class to calculate order size based on risk per trade and entry/stop-loss prices
-- [ ] Implement `purchased_asset` method to keep track of purchased assets
+- Modify the `sell_order` method to retrieve order details []
+- Calculate profit/loss and duration based on stored order details []
+- Update order status in the dictionary to "complete" []
+- Call `DatabaseHandler` method to store completed order details []
 
-## Code Organization
+## Integration and Testing
 
-- [ ] Separate concerns:
-  - [ ] Keep indicator calculations (Bollinger Bands, RSI) in separate classes or modules
-  - [ ] Create a separate class or module for trading logic and signal generation
-  - [ ] Use `OrderCalculator` class for risk management and order placement
+- Integrate all updated components into your `BinanceWebsocketStream` class []
+- Test your bot with a small amount of capital or in paper trading []
+- Monitor logs and database to verify order functionality []
 
-- [ ] Data management:
-  - [ ] Implement reliable methods to fetch and store historical price data
-  - [ ] Ensure efficient data handling and storage mechanisms
+## Multiple Currency Support (Future Enhancement)
 
-- [ ] Backtesting and optimization:
-  - [ ] Perform backtesting on historical data to validate strategy performance
-  - [ ] Optimize indicator parameters and trading rules based on backtesting results
-
-- [ ] Error handling and logging:
-  - [ ] Implement robust error handling to handle exceptions and unexpected situations
-  - [ ] Use logging to track algorithm behavior, decisions, and errors
-
-- [ ] Modular and reusable code:
-  - [ ] Break down code into smaller, reusable functions and classes
-  - [ ] Ensure each component has a clear responsibility and is easily testable
-
-- [ ] Documentation and comments:
-  - [ ] Provide clear documentation for code, explaining purpose and functionality
-  - [ ] Use comments to clarify complex logic or algorithms
-
-## Deployment and Monitoring
-
-- [ ] Test code thoroughly before deploying
-- [ ] Start with small amounts of capital in live trading environment
-- [ ] Continuously monitor algorithm performance and make adjustments as needed
+- Refactor code to allow multiple `BinanceWebsocketStream` instances []
+- Modify the `start` method to accept currency pair parameters []
+- Create instances for each desired currency pair and start them simultaneously []
