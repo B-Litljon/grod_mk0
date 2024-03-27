@@ -100,16 +100,8 @@ Note: The `place_order` method requires a properly configured Binance client API
             return 0
         num_of_shares_to_buy = risk_per_trade_amt / risk_per_share
         return round(num_of_shares_to_buy, 2)  # Assuming the exchange allows for fractional quantities
-    # keep track of the assets that have been purchased in a dict
-    def purchased_asset(self, symbol, entry_price, quantity):
-        asset = {
-            'Symbol': symbol,
-            'EntryPrice': entry_price,
-            'Quantity': quantity
-        }
-    # need to implement proper error handling using the logging module
-    # and handle the case where the order is not placed successfully for various reasons
-    def place_order(self, symbol, order_type, quantity, price):
+    
+    def place_order(self, symbol, order_type, quantity, price):  # should use calculate order size to get the quantity
         try:
             # Generate a unique order ID
             order_id = f"{int(time.time() * 1000)}_{symbol}_{uuid.uuid4().hex}"
