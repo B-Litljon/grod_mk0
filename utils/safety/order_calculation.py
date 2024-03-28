@@ -106,7 +106,7 @@ Note: The `place_order` method requires a properly configured Binance client API
             # Generate a unique order ID
             order_id = f"{int(time.time() * 1000)}_{symbol}_{uuid.uuid4().hex}"
 
-            if order_type == 'buy':
+            if order_type == 'buy': # import tiggers and set a variable to check if the signal is true
                 order = client.create_order(
                     symbol=symbol,
                     side=Client.SIDE_BUY,
@@ -120,7 +120,7 @@ Note: The `place_order` method requires a properly configured Binance client API
                     symbol=symbol,
                     side=Client.SIDE_SELL,
                     type=Client.ORDER_TYPE_MARKET,
-                    quantity=quantity,
+                    quantity=quantity, # should use the active order dict to get time of purchase and calculate the quantity to sell
                     newClientOrderId=order_id
                 )
                 print(order)

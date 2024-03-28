@@ -13,7 +13,7 @@
 
 ## Implement Database Persistence
 
-- add methods to store price data to csv after it fills the websocket dataframe []
+- add methods to store price data to csv after it fills the websocket dataframe [X]
 - add method to store order information into order calculation []
 
 ## Error Handling and Logging
