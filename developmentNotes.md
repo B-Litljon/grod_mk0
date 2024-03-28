@@ -13,9 +13,8 @@
 
 ## Implement Database Persistence
 
-- Create a `DatabaseHandler` class to manage database operations []
-- Implement methods to create tables and insert order data []
-- Call `DatabaseHandler` method to store order details after selling []
+- add methods to store price data to csv after it fills the websocket dataframe []
+- add method to store order information into order calculation []
 
 ## Error Handling and Logging
 
