@@ -11,7 +11,7 @@
 - Modify the `place_order` method to generate unique order IDs [X]
 - Update the `place_order` method to store order details in a dictionary [X]
 
-## Implement Database Persistence
+## Implement Data Persistence
 
 - add methods to store price data to csv after it fills the websocket dataframe [X]
 - add method to store order information into order calculation []

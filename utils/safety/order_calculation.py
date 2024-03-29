@@ -114,6 +114,9 @@ Note: The `place_order` method requires a properly configured Binance client API
                     quantity=quantity,
                     newClientOrderId=order_id
                 )
+                # need to update place order method to place the order, then update the active orders dict with the order details
+                # create logic to check the active order dict 
+
                 print(order)
             elif order_type == 'sell':
                 order = client.create_order(
