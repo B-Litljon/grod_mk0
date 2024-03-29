@@ -7,6 +7,7 @@ from binance import Client, ThreadedWebsocketManager
 import pandas as pd
 import numpy as np
 import time
+import os
 # import asyncio
 from dotenv import load_dotenv
 from ..indicators.bollinger_bands import BollingerBands
@@ -100,8 +101,14 @@ class BinanceWebsocketStream:
         # Limit DataFrame size
         max_rows = 1000
         if data_df_length > max_rows:
-            self.dataframe.drop(self.dataframe.index[0], inplace=True)
+            # Extract the first row of the DataFrame
+            row_to_append = self.dataframe.iloc[0]
 
+            # Write the row to the CSV file in append mode if the file exists, otherwise write the header
+            row_to_append.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
+
+            # Delete the first row from the DataFrame
+            self.dataframe.drop(self.dataframe.index[0], inplace=True)
 
     def check_signal(self):
         if trgr.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, self.dataframe):
