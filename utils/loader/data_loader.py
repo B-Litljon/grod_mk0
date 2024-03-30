@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 from ..indicators.bollinger_bands import BollingerBands
 from ..indicators.rsi import RSI
-from ..indicators.trigger import Trigger as trgr
+from ..signals.trigger import Trigger as trgr
 from ..safety.order_calculation import TradeCalculator, TradeConfig
 
 class BinanceWebsocketStream:
