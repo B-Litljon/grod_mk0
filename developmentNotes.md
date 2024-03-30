@@ -16,6 +16,16 @@
 - add methods to store price data to csv after it fills the websocket dataframe [X]
 - add method to store order information into order calculation []
 
+# Create higher level 'BOT' class.
+- this class should import all the logic needed from all the other files in the project and implement them in a way thats easy to call in the main
+
+## Update Order Management
+
+- Modify the `sell_order` method to retrieve order details [x]
+- Calculate profit/loss and duration based on stored order details [x]
+- Update order status in the dictionary to "complete" [x]
+- Call `DatabaseHandler` method to store completed order details [x]
+
 ## Error Handling and Logging
 
 - Import the logging module []
@@ -23,12 +33,6 @@
 - Add log statements throughout your code []
 - Implement error handling using try-except blocks []
 
-## Update Order Management
-
-- Modify the `sell_order` method to retrieve order details []
-- Calculate profit/loss and duration based on stored order details []
-- Update order status in the dictionary to "complete" []
-- Call `DatabaseHandler` method to store completed order details []
 
 ## Integration and Testing
 
