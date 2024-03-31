@@ -1,5 +1,5 @@
-from bollinger_bands import BollingerBands
-from rsi import RSI
+from ..indicators.bollinger_bands import BollingerBands
+from ..indicators.rsi import RSI
 
 class Triggers:
     """

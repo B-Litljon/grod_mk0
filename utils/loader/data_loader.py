@@ -1,8 +1,3 @@
-# Description: This file contains the function to start a WebSocket stream to listen for candlestick data from Binance.
-# The function will also calculate the Bollinger Bands, RSI, and Support/Resistance levels for the candlestick data.
-# The function will then print the data to the console and update the DataFrame with the new data.
-# The function will also include the trade logic to make trade decisions based on the calculated indicators and risk management parameters.
-
 from binance import Client, ThreadedWebsocketManager
 import pandas as pd
 import numpy as np
@@ -12,11 +7,11 @@ import os
 from dotenv import load_dotenv
 from ..indicators.bollinger_bands import BollingerBands
 from ..indicators.rsi import RSI
-from ..indicators.trigger import Trigger as trgr
+from ..signals.trigger import Triggers as trigger
 from ..safety.order_calculation import TradeCalculator, TradeConfig
 
 class BinanceWebsocketStream:
-    def __init__(self, symbol, interval, api_key, api_secret):
+    def __init__(self, symbol, interval, api_key , api_secret):
         self.symbol = symbol
         self.interval = interval
         self.api_key = api_key
@@ -48,7 +43,7 @@ class BinanceWebsocketStream:
             upper_band, middle_band, lower_band = self.bbands.update(close_price)
 
             new_data = {
-                'Time': close_time,
+                'Time': close_time, 
                 'Open': open_price,
                 'High': high_price,
                 'Low': low_price,
@@ -111,14 +106,14 @@ class BinanceWebsocketStream:
             self.dataframe.drop(self.dataframe.index[0], inplace=True)
 
     def check_signal(self):
-        if trgr.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, self.dataframe):
+        if trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, self.dataframe):
             print('Signal detected')
-            # self.tc.calculate_order_size()
-            # self.tc.calculate_stop_loss()
-            # self.tc.calculate_take_profit()
-            # self.tc.calculate_risk_reward_ratio
-
-        
+            self.tc.buy_order(
+                symbol=self.symbol,
+                order_type='market',
+                quantity=self.tc.calculate_order_size(entry_price=self.dataframe['Close'].iloc[-1]), # calculate order size needs to also calculate stop loss and take profit 
+                newClientOrderId='test_order').manage_orders(closing_price=self.dataframe['Close'].iloc[-1])
+            
 
     def start(self):
         self.twm.start()

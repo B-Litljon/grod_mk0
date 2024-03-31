@@ -1,0 +1,1 @@
+from signals import Trigger as trgr
