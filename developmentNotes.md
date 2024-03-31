@@ -14,20 +14,26 @@
 ## Implement Data Persistence
 
 - add methods to store price data to csv after it fills the websocket dataframe [X]
-- add method to store order information into order calculation []
-
-# Create higher level 'BOT' class.
-- this class should import all the logic needed from all the other files in the project and implement them in a way thats easy to call in the main
+- add method to store order information into order calculation [X]
 
 ## Update Order Management
+- Modify the `sell_order` method to retrieve order details [X]
+- Calculate profit/loss and duration based on stored order details [X]
+- Update order status in the dictionary to "complete" [X]
+- Call `DatabaseHandler` method to store completed order details [X]
 
-- Modify the `sell_order` method to retrieve order details [x]
-- Calculate profit/loss and duration based on stored order details [x]
-- Update order status in the dictionary to "complete" [x]
-- Call `DatabaseHandler` method to store completed order details [x]
+# Create higher level 'BOT' class.
+- import websocket class []
+- import order calculator []
+- import triggers []
+    ### bot flow:
+    - start the wss []
+    - initiate the trigger []
+    - when trigger: order calculator place order []
+    - write overflow price data to csv []
+    - write all buy and sell orders to csv [] 
 
 ## Error Handling and Logging
-
 - Import the logging module []
 - Set up a logger with appropriate levels []
 - Add log statements throughout your code []

@@ -100,12 +100,13 @@ Note: The `place_order` method requires a properly configured Binance client API
             return 0
         num_of_shares_to_buy = risk_per_trade_amt / risk_per_share
         return round(num_of_shares_to_buy, 2)  # round to 2 decimal places
+    # need to add method to calculate take profit in relation to bolloinger bands
+    # this way there is only one calculation happening instead of constantly checking for both entries and exits
     
     def buy_order(self, symbol, quantity, entry_price, take_profit, stop_loss):
         try:
             # Generate a unique order ID
             order_id = f"{int(time.time() * 1000)}_{symbol}_{uuid.uuid4().hex}"
-
             order = client.create_order(
                 symbol=symbol,
                 side=Client.SIDE_BUY,
@@ -113,7 +114,6 @@ Note: The `place_order` method requires a properly configured Binance client API
                 quantity=quantity,
                 newClientOrderId=order_id
             )
-
             if order:
                 # Store the order details in the active_order dictionary
                 self.active_order = {
@@ -127,9 +127,7 @@ Note: The `place_order` method requires a properly configured Binance client API
                     'quantity': quantity,
                     'status': 'NEW'
                 }
-
             return order_id # maybe update to return the dict instead of the order_id 
-
         except Exception as e:
             print(e)
             return None
@@ -144,36 +142,31 @@ Note: The `place_order` method requires a properly configured Binance client API
                 quantity=order['quantity'],
                 newClientOrderId=f"{order['order_id']}_SELL"
             )
-
             if sell_order:
                 # Update the status and timestamp of the sold order
                 order['status'] = 'SOLD'
                 order['sell_timestamp'] = int(time.time() * 1000)
                 order['sell_price'] = current_price
-
                 # Calculate the profit or loss
                 profit_loss = (current_price - order['entry_price']) * order['quantity']
                 order['profit_loss'] = profit_loss
-
                 # Label the order as 'GAIN' or 'LOSS'
                 if profit_loss > 0:
                     order['outcome'] = 'GAIN'
                 else:
                     order['outcome'] = 'LOSS'
-
                 # Convert the order dictionary to a DataFrame
                 order_df = pd.DataFrame([order])
-
                 # Write the DataFrame to a CSV file
                 order_df.to_csv('order_history.csv', mode='a', header=not os.path.exists('order_history.csv'), index=False)
-
                 # Reset the active_order to None
                 self.active_order = None
-
         except Exception as e:
             print(e)
 
-    def lookout(self, current_price):
-        if self.active_order and self.active_order['status'] == 'NEW':
-            if current_price <= self.active_order['stop_loss'] or current_price >= self.active_order['take_profit']:
-                self.sell_order(current_price)
+    def manage_orders(self, current_price):
+        if self.active_order:
+            order = self.active_order
+            if order['status'] == 'NEW':
+                if current_price <= order['stop_loss'] or current_price >= order['take_profit']:
+                    self.sell_order(current_price)
