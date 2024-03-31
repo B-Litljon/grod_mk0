@@ -95,17 +95,17 @@ Note: The `place_order` method requires a properly configured Binance client API
     # Calculate the size of the order to place for added safety
     def calculate_order_size(self, entry_price, middle_band):
         stop_loss_percentage = 0.02
-        stop_loss_price = entry_price * (1 - stop_loss_percentage)
-        take_profit_price = middle_band * 0.999  # Adjust the multiplier as needed
+        stop_loss = entry_price * (1 - stop_loss_percentage)
+        take_profit = middle_band * 0.999  # Adjust the multiplier as needed
 
         risk_per_trade_amt = self.usdt_balance * self.risk_per_trade
-        risk_per_share = abs(entry_price - stop_loss_price)
+        risk_per_share = abs(entry_price - stop_loss)
         if risk_per_share <= 0:
             return 0, 0, 0
         num_of_shares_to_buy = risk_per_trade_amt / risk_per_share
         rounded_shares = round(num_of_shares_to_buy, 2)  # round to 2 decimal places
 
-        return rounded_shares, stop_loss_price, take_profit_price
+        return rounded_shares, stop_loss, take_profit
     
     def buy_order(self, symbol, quantity, entry_price, take_profit, stop_loss):
         try:
