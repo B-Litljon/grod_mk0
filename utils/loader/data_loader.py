@@ -94,7 +94,7 @@ class BinanceWebsocketStream:
         self.check_signal() 
 
         # Limit DataFrame size
-        max_rows = 1000
+        max_rows = 101
         if data_df_length > max_rows:
             # Extract the first row of the DataFrame
             row_to_append = self.dataframe.iloc[0]
