@@ -7,7 +7,7 @@ class Bot:
     def run(self):
         print('booting up...')
         self.fetch_historical_data()
-        print('historical data loaded')
+        print('fetching historical data...')
         print('starting websocket stream...')
         self.stream.start()
     
