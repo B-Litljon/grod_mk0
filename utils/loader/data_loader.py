@@ -11,6 +11,51 @@ from ..signals.trigger import Triggers as trigger
 from ..safety.order_calculation import TradeCalculator, TradeConfig
 
 class BinanceWebsocketStream:
+    """
+A class for streaming real-time candlestick data from Binance and performing technical analysis using Bollinger Bands and RSI.
+
+Instantiate the class by creating an instance of BinanceWebsocketStream:
+    stream = BinanceWebsocketStream(symbol='BTCUSDT', interval=Client.KLINE_INTERVAL_1MINUTE, api_key='your_api_key', api_secret='your_api_secret')
+
+Args:
+    symbol (str): The trading pair symbol to stream data for (e.g., 'BTCUSDT').
+    interval (str): The interval of the candlestick data (e.g., Client.KLINE_INTERVAL_1MINUTE).
+    api_key (str): Your Binance API key.
+    api_secret (str): Your Binance API secret.
+
+The `BinanceWebsocketStream` class sets up a connection to the Binance WebSocket API and streams real-time candlestick data
+for the specified trading pair and interval. It performs technical analysis using Bollinger Bands and RSI indicators and
+stores the data in a pandas DataFrame.
+
+Attributes:
+    bbands (BollingerBands): An instance of the BollingerBands class for calculating Bollinger Bands.
+    rsi (RSI): An instance of the RSI class for calculating the Relative Strength Index.
+    dataframe (pandas.DataFrame): A DataFrame to store the candlestick data and technical indicators.
+    twm (ThreadedWebsocketManager): An instance of the Binance ThreadedWebsocketManager for managing the WebSocket connection.
+    tc (TradeCalculator): An instance of the TradeCalculator class for calculating trade sizes and managing orders.
+    client (Client): An instance of the Binance Client for making API requests.
+
+Methods:
+    - `fetch_historical_data()`: Fetches historical candlestick data and initializes the DataFrame.
+    - `handle_socket_message(msg)`: Handles incoming WebSocket messages, updates the DataFrame, and checks for trading signals.
+    - `check_signal()`: Checks for trading signals based on the RSI and Bollinger Band expansion strategy.
+    - `start()`: Starts the WebSocket stream and keeps the program running until interrupted.
+
+Example usage:
+    # Create an instance of BinanceWebsocketStream
+    stream = BinanceWebsocketStream(symbol='BTCUSDT', interval=Client.KLINE_INTERVAL_1MINUTE, api_key='your_api_key', api_secret='your_api_secret')
+    
+    # Start the WebSocket stream
+    stream.start()
+
+Note:
+    - The `fetch_historical_data()` method should be called before starting the WebSocket stream to initialize the DataFrame
+      with historical data.
+    - The `check_signal()` method uses the `rsi_and_bb_expansion_strategy()` method from the `Triggers` class to check for
+      trading signals based on RSI and Bollinger Band expansion.
+    - The DataFrame size is limited to a maximum of 101 rows, and older data is written to a CSV file before being removed
+      from the DataFrame to manage memory usage.
+"""
     def __init__(self, symbol, interval, api_key , api_secret):
         self.symbol = symbol
         self.interval = interval
