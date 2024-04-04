@@ -167,7 +167,7 @@ Note: The `place_order` method requires a properly configured Binance client API
                 self.active_order = None
         except Exception as e:
             print(e)
-
+    # compares the tp/sl to the current price and sells the order if the price is reached
     def manage_orders(self, current_price):
         if self.active_order:
             order = self.active_order
