@@ -74,7 +74,7 @@ Note: The `rsi_divergence_strategy()` method is not yet implemented and needs to
             else:
                 return False
 
-        # Stage 2: Check if RSI is back in the normal range, Bollinger Bands are expanding, and bullish engulfing pattern
+        # Stage 2: Check if RSI is back in the normal range, Bollinger Bands are expanding, and bullish engulfing pattern            
         if self.stage_one_triggered:
             if 30 <= self.rsi_values[-1] < 35:
                 # Utilize the calculate_bandwidth_roc method to check for Bollinger Bands expansion
@@ -87,3 +87,5 @@ Note: The `rsi_divergence_strategy()` method is not yet implemented and needs to
 
         return False
     
+# dev note: you may need to incorporate some logic to limit the window of time stage two has to trigger, 
+            # it is very possible that stage two will trigger even if it shouldn't in this current implementation
