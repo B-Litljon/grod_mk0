@@ -23,15 +23,8 @@
 - Call `DatabaseHandler` method to store completed order details [X]
 
 # Create higher level 'BOT' class.
-- import websocket class []
-- import order calculator []
-- import triggers []
-    ### bot flow:
-    - start the wss []
-    - initiate the trigger []
-    - when trigger: order calculator place order []
-    - write overflow price data to csv []
-    - write all buy and sell orders to csv [] 
+- import websocket class [x]
+ 
 
 ## Error Handling and Logging
 - Import the logging module []
