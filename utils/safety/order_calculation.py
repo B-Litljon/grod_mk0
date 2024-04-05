@@ -4,6 +4,11 @@ import os
 import pandas as pd
 import time
 import uuid
+import logging
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 api_key = os.getenv ('BINANCE_API_KEY')
@@ -131,9 +136,10 @@ Note: The `place_order` method requires a properly configured Binance client API
                     'quantity': quantity,
                     'status': 'NEW'
                 }
+                logger.info(f'Buy order placed: {self.active_order}')
             return order_id # maybe update to return the dict instead of the order_id 
         except Exception as e:
-            print(e)
+            logger.error(f"Error placing buy order: {str(e)}")
             return None
 
     def sell_order(self, current_price):
@@ -159,6 +165,7 @@ Note: The `place_order` method requires a properly configured Binance client API
                     order['outcome'] = 'GAIN'
                 else:
                     order['outcome'] = 'LOSS'
+                logger.info(f'Sell order placed: {order}')    
                 # Convert the order dictionary to a DataFrame
                 order_df = pd.DataFrame([order])
                 # Write the DataFrame to a CSV file
@@ -166,11 +173,15 @@ Note: The `place_order` method requires a properly configured Binance client API
                 # Reset the active_order to None
                 self.active_order = None
         except Exception as e:
-            print(e)
+            logger.error(f"Error executing sell order: {str(e)}")
     # compares the tp/sl to the current price and sells the order if the price is reached
     def manage_orders(self, current_price):
         if self.active_order:
             order = self.active_order
             if order['status'] == 'NEW':
-                if current_price <= order['stop_loss'] or current_price >= order['take_profit']:
+                if current_price <= order['stop_loss']:
+                    logger.info(f"Stop loss triggered for order {order['order_id']}")
+                    self.sell_order(current_price)
+                elif current_price >= order['take_profit']:
+                    logger.info(f"Take profit triggered for order {order['order_id']}")
                     self.sell_order(current_price)
