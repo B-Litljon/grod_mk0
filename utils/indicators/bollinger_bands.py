@@ -29,6 +29,10 @@ Note: The class requires a sufficient amount of price data to calculate the Boll
         self.prices = []
         self.mean = 0
         self.std_dev = 0
+        self.upper_band = []
+        self.middle_band = []
+        self.lower_band = []
+        self.band_width = []
     # this method is good for testing, but in the real world we will need to implement logic to request enough data from the api to calculate the bollinger bands in the first place
         # as it stands now the bollinger bands will not be calculated until the window is filled with data, which is not ideal for trading, it would take like 20-30 minutes to get the first bollinger band
     def update(self, new_price):
@@ -44,10 +48,10 @@ Note: The class requires a sufficient amount of price data to calculate the Boll
         lower_band = self.mean - (self.std_dev * self.num_of_std)
         band_width = upper_band - lower_band
 
-        self.upper_bands.append(upper_band)
-        self.middle_bands.append(self.mean)
-        self.lower_bands.append(lower_band)
-        self.band_widths.append(band_width)
+        self.upper_band.append(upper_band)
+        self.middle_band.append(self.mean)
+        self.lower_band.append(lower_band)
+        self.band_width.append(band_width)
         
         return upper_band, self.mean, lower_band
     # note: you can utilize this method using different periods to make a mini bollinger band for the upper and lower bands to aid in spotting trends in the data 

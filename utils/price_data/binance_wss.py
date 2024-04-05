@@ -80,10 +80,11 @@ Note:
             volume = float(kline[5])
             close_time = pd.to_datetime(kline[6], unit='ms')
 
-            rsi_value = None
-            if len(self.rsi.prices) > 0:
-                previous_close = self.rsi.prices[-1]
+            if len(self.dataframe) > 0:
+                previous_close = self.dataframe['Close'].iloc[-1]
                 rsi_value = self.rsi.update(close_price, previous_close)
+            else:
+                rsi_value = None
 
             upper_band, middle_band, lower_band = self.bbands.update(close_price)
 
@@ -114,9 +115,11 @@ Note:
         close_price = float(candle['c'])
         close_time = pd.to_datetime(candle['T'], unit='ms')
 
-        if hasattr(self.bbands, 'prices') and len (self.bbands.prices) > 0:
-            previous_close = self.bbands.prices[-1]
+        if len(self.dataframe) > 0:
+            previous_close = self.dataframe['Close'].iloc[-1]
             rsi_value = self.rsi.update(close_price, previous_close)
+        else:
+            rsi_value = None
 
         upper_band, middle_band, lower_band = self.bbands.update(close_price)
 
