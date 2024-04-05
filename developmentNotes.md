@@ -27,15 +27,21 @@
  
 
 ## Error Handling and Logging
-- Import the logging module []
-- Set up a logger with appropriate levels []
+- Import the logging module [x]
+- Set up a logger with appropriate levels [x]
 - Add log statements throughout your code []
 - Implement error handling using try-except blocks []
 
 
 ## Integration and Testing
+- implement 'live tuning' []
+    ### live tuning:
+        live tuning will allow you to tweak parameters while the bot is running
+        and test the results to make for a smoother debugging experience.
+        will also help making the bot profitable faster... 
+        maybe machine learning would make more sense in this case? idk, we'll see 
 
-- Integrate all updated components into your `BinanceWebsocketStream` class []
+- Integrate all updated components into your `BinanceWebsocketStream` class [x]
 - Test your bot with a small amount of capital or in paper trading []
 - Monitor logs and database to verify order functionality []
 
