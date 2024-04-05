@@ -5,10 +5,10 @@ import time
 import os
 # import asyncio
 from dotenv import load_dotenv
-from indicators.bollinger_bands import BollingerBands
-from indicators.rsi import RSI
-from signals.trigger import Triggers as trigger
-from safety.order_calculation import OrderCalculator, TradeConfig
+from utils.indicators.bollinger_bands import BollingerBands
+from utils.indicators.rsi import RSI
+from utils.signals.trigger import Triggers as trigger
+from utils.safety.order_calculation import OrderCalculator, TradeConfig
 
 class BinanceWebsocketStream:
     """

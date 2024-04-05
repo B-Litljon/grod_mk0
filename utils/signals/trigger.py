@@ -1,5 +1,5 @@
-from indicators.bollinger_bands import BollingerBands
-from indicators.rsi import RSI
+from utils.indicators.bollinger_bands import BollingerBands
+from utils.indicators.rsi import RSI
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

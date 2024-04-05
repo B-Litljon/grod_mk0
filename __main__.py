@@ -1,15 +1,22 @@
 from dotenv import load_dotenv
 import os
-from utils.bot import Bot 
+from utils.price_data.binance_wss import BinanceWebsocketStream as Bot
 
 # import necessary libraries and modules
-
 
 if __name__ == "__main__":
     load_dotenv()
     api_key = os.getenv('BINANCE_API_KEY')
     api_secret = os.getenv('BINANCE_SECRET_KEY')
-    symbol = input("Enter the symbol you want to trade: ").lower() + 'USDT'
+    symbol = input("Enter the symbol you want to trade: ").upper() + 'USDT'
     interval = '1M'  # input("Enter the interval you want to trade: ").lower()
 
-    Bot.run(api_key, api_secret, symbol, interval)
+    bot = Bot(symbol, interval, api_key, api_secret)
+    bot.fetch_historical_data()  # Fetch historical data before starting the WebSocket stream
+    bot.start()
+
+    # Wait for the bot to finish or handle any other necessary cleanup
+    # You can add any additional code or logic here
+
+    bot.twm.stop()  # Stop the WebSocket stream
+    bot.twm.join()  # Wait for the WebSocket thread to terminate
