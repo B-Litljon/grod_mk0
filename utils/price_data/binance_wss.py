@@ -5,10 +5,10 @@ import time
 import os
 # import asyncio
 from dotenv import load_dotenv
-from ..indicators.bollinger_bands import BollingerBands
-from ..indicators.rsi import RSI
-from ..signals.trigger import Triggers as trigger
-from ..safety.order_calculation import TradeCalculator, TradeConfig
+from indicators.bollinger_bands import BollingerBands
+from indicators.rsi import RSI
+from signals.trigger import Triggers as trigger
+from safety.order_calculation import OrderCalculator, TradeConfig
 
 class BinanceWebsocketStream:
     """
@@ -32,7 +32,7 @@ Attributes:
     rsi (RSI): An instance of the RSI class for calculating the Relative Strength Index.
     dataframe (pandas.DataFrame): A DataFrame to store the candlestick data and technical indicators.
     twm (ThreadedWebsocketManager): An instance of the Binance ThreadedWebsocketManager for managing the WebSocket connection.
-    tc (TradeCalculator): An instance of the TradeCalculator class for calculating trade sizes and managing orders.
+    tc (OrderCalculator): An instance of the OrderCalculator class for calculating trade sizes and managing orders.
     client (Client): An instance of the Binance Client for making API requests.
 
 Methods:
@@ -65,7 +65,7 @@ Note:
         self.rsi = RSI(period=14)
         self.dataframe = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.tc = TradeCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'TradeCalculator'
+        self.tc = OrderCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
 
     def fetch_historical_data(self):

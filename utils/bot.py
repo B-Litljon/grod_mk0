@@ -1,4 +1,5 @@
-from .loader import BinanceWebsocketStream
+from utils.price_data.binance_wss import BinanceWebsocketStream
+
 
 class Bot:
     def __init__(self, symbol, interval, api_key, api_secret):
