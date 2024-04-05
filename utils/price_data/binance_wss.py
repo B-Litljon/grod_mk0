@@ -81,7 +81,7 @@ Note:
             close_time = pd.to_datetime(kline[6], unit='ms')
 
             if len(self.dataframe) > 0:
-                previous_close = self.dataframe['Close'].iloc[-1]
+                previous_close = self.dataframe['close'].iloc[-1]
                 rsi_value = self.rsi.update(close_price, previous_close)
             else:
                 rsi_value = None
@@ -116,7 +116,7 @@ Note:
         close_time = pd.to_datetime(candle['T'], unit='ms')
 
         if len(self.dataframe) > 0:
-            previous_close = self.dataframe['Close'].iloc[-1]
+            previous_close = self.dataframe['close'].iloc[-1]
             rsi_value = self.rsi.update(close_price, previous_close)
         else:
             rsi_value = None
