@@ -63,11 +63,11 @@ Note:
         self.api_secret = api_secret
         self.bbands = BollingerBands(window= 20, num_of_std=2)
         self.rsi = RSI(period=14)
-        self.dataframe = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
+        self.kline_data = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
         self.order_calculator = OrderCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.trigger = Triggers(BollingerBands=self.bbands, rsi=self.rsi, price_data=self.dataframe['close'])
+        self.trigger = Triggers(bollinger_bands=self.bbands, rsi_values=self.rsi, price_data=self.kline_data)
 
     def fetch_historical_data(self):
         print('Fetching historical data...')
@@ -80,17 +80,14 @@ Note:
             close_price = float(kline[4])
             volume = float(kline[5])
             close_time = pd.to_datetime(kline[6], unit='ms')
-
-            if len(self.dataframe) > 0:
-                previous_close = self.dataframe['close'].iloc[-1]
+            if len(self.kline_data) > 0:
+                previous_close = self.kline_data['close'].iloc[-1]
                 rsi_value = self.rsi.update(close_price, previous_close)
             else:
                 rsi_value = None
-
             upper_band, middle_band, lower_band = self.bbands.update(close_price)
-
-            historic_data = {  
-                'time': close_time, 
+            historic_data = {
+                'time': close_time,
                 'open': open_price,
                 'high': high_price,
                 'low': low_price,
@@ -100,59 +97,43 @@ Note:
                 'middlebb': middle_band,
                 'lowerbb': lower_band
             }
-
-            data_df_length = len(self.dataframe)
-            self.dataframe.loc[data_df_length] = new_data
-
+            data_df_length = len(self.kline_data)
+            self.kline_data.loc[data_df_length] = historic_data
         print('Historical data loaded.')
 
     def handle_socket_message(self, msg):
         print('message received')
         candle = msg['k']
-        rsi_value = None
         open_price = float(candle['o'])
         high_price = float(candle['h'])
         low_price = float(candle['l'])
         close_price = float(candle['c'])
         close_time = pd.to_datetime(candle['T'], unit='ms')
-
-        if len(self.dataframe) > 0:
-            previous_close = self.dataframe['close'].iloc[-1]
+        if len(self.kline_data) > 0:
+            previous_close = self.kline_data['close'].iloc[-1]
             rsi_value = self.rsi.update(close_price, previous_close)
         else:
             rsi_value = None
-
         upper_band, middle_band, lower_band = self.bbands.update(close_price)
-
         new_data = {
-            'Time': close_time,
-            'Open': open_price,
-            'High': high_price,
-            'Low': low_price,
-            'Close': close_price,
-            'RSI': rsi_value if rsi_value is not None else np.nan,
-            'UpperBB': upper_band,
-            'MiddleBB': middle_band,
-            'LowerBB': lower_band
+            'time': close_time,
+            'open': open_price,
+            'high': high_price,
+            'low': low_price,
+            'close': close_price,
+            'rsi': rsi_value if rsi_value is not None else np.nan,
+            'upperbb': upper_band,
+            'middlebb': middle_band,
+            'lowerbb': lower_band
         }
-        
-        # append new data to DataFrame
-        data_df_length = len(self.dataframe)
-        self.dataframe.loc[data_df_length] = new_data
-
-        self.check_signal() 
-
-        # Limit DataFrame size
+        data_df_length = len(self.kline_data)
+        self.kline_data.loc[data_df_length] = new_data
+        self.check_signal()
         max_rows = 101
-        if data_df_length > max_rows:
-            # Extract the first row of the DataFrame
-            row_to_append = self.dataframe.iloc[0]
-
-            # Write the row to the CSV file in append mode if the file exists, otherwise write the header
+        if len(self.kline_data) > max_rows:
+            row_to_append = self.kline_data.iloc[0]
             row_to_append.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
-
-            # Delete the first row from the DataFrame
-            self.dataframe.drop(self.dataframe.index[0], inplace=True)
+            self.kline_data.drop(self.kline_data.index[0], inplace=True)
 
     def check_signal(self):
         if self.trigger.rsi_and_bb_expansion_strategy():
@@ -160,10 +141,9 @@ Note:
             self.order_calculator.buy_order(
                 symbol=self.symbol,
                 order_type='market',
-                quantity=self.order_calculator.calculate_order_size(entry_price=self.dataframe['close'].iloc[-1]), # calculate order size needs to also calculate stop loss and take profit 
-                newClientOrderId='test_order').manage_orders(closing_price=self.dataframe['close'].iloc[-1])
+                quantity=self.order_calculator.calculate_order_size(entry_price=self.kline_data['close'].iloc[-1]), # calculate order size needs to also calculate stop loss and take profit 
+                newClientOrderId='test_order').manage_orders(closing_price=self.kline_data['close'].iloc[-1])
             
-
     def start(self):
         self.twm.start()
         stream_name = self.twm.start_kline_socket(

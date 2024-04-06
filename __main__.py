@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from utils.bot import BinanceWebsocketStream as Bot
+from utils.bot import Bot
 
 # import necessary libraries and modules
 
@@ -15,8 +15,8 @@ if __name__ == "__main__":
     bot.fetch_historical_data()  # Fetch historical data before starting the WebSocket stream
     bot.start()
 
-    # Wait for the bot to finish or handle any other necessary cleanup
-    # You can add any additional code or logic here
+    # # Wait for the bot to finish or handle any other necessary cleanup
+    # # You can add any additional code or logic here
 
-    bot.twm.stop()  # Stop the WebSocket stream
-    bot.twm.join()  # Wait for the WebSocket thread to terminate
+    # bot.twm.stop()  # Stop the WebSocket stream
+    # bot.twm.join()  # Wait for the WebSocket thread to terminate
