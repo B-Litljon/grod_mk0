@@ -1,4 +1,4 @@
-
+import pandas as pd
 class RSI:
     """
 A class for calculating and updating the Relative Strength Index (RSI) and checking for divergences.
