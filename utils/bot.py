@@ -130,7 +130,7 @@ Note:
             'middlebb': middle_band,
             'lowerbb': lower_band
         }
-        self.logger.info(f"latest data: {new_data}")
+        self.logger.info(f"latest data: {new_data}") # logging new data without concatenating it to the dataframe will give you the same value for high, low, open, close, and rsi
         data_df_length = len(self.kline_data)
         self.kline_data.loc[data_df_length] = new_data
         self.check_signal()
