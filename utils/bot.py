@@ -103,10 +103,10 @@ Note:
             }
             data_df_length = len(self.kline_data)
             self.kline_data.loc[data_df_length] = historic_data
-        print('Historical data loaded.')
+        print('Historical data recieved.')
 
     def handle_socket_message(self, msg):
-        print('message received')
+        self.logger.info('message received')
         candle = msg['k']
         open_price = float(candle['o'])
         high_price = float(candle['h'])
@@ -130,6 +130,7 @@ Note:
             'middlebb': middle_band,
             'lowerbb': lower_band
         }
+        self.logger.info(f"latest data: {new_data}")
         data_df_length = len(self.kline_data)
         self.kline_data.loc[data_df_length] = new_data
         self.check_signal()
