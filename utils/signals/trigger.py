@@ -62,7 +62,7 @@ Note: The `rsi_divergence_strategy()` method is not yet implemented and needs to
             return False
 
         current_candle = dataframe.iloc[-1]
-        previous_candle = dataframe.iloc[-2]
+        previous_candle = dataframe.iloc[-2]    
 
         if current_candle['close'] > previous_candle['open'] and current_candle['open'] < previous_candle['close']:
             return True
