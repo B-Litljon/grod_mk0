@@ -57,12 +57,12 @@ Note: The `rsi_divergence_strategy()` method is not yet implemented and needs to
         # Implement logic for RSI divergence strategy
         pass
 
-    def is_bullish_engulfing(self):
-        if len(self.price_data) < 2:
+    def is_bullish_engulfing(self, dataframe):
+        if len(dataframe) < 2:
             return False
 
-        current_candle = self.price_data[-1]
-        previous_candle = self.price_data[-2]
+        current_candle = dataframe.iloc[-1]
+        previous_candle = dataframe.iloc[-2]
 
         if current_candle['close'] > previous_candle['open'] and current_candle['open'] < previous_candle['close']:
             return True
