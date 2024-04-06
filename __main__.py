@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from utils.price_data.binance_wss import BinanceWebsocketStream as Bot
+from utils.bot import BinanceWebsocketStream as Bot
 
 # import necessary libraries and modules
 

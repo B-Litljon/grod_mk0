@@ -65,7 +65,7 @@ Note:
         self.rsi = RSI(period=14)
         self.dataframe = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.tc = OrderCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
+        self.order_calculator = OrderCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
         self.trigger = Triggers(BollingerBands=self.bbands, rsi=self.rsi, price_data=self.dataframe['close'])
 
@@ -89,7 +89,7 @@ Note:
 
             upper_band, middle_band, lower_band = self.bbands.update(close_price)
 
-            new_data = {
+            new_data = {  
                 'Time': close_time, 
                 'Open': open_price,
                 'High': high_price,
@@ -155,13 +155,13 @@ Note:
             self.dataframe.drop(self.dataframe.index[0], inplace=True)
 
     def check_signal(self):
-        if self.trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, self.dataframe):
+        if self.trigger.rsi_and_bb_expansion_strategy():
             print('Signal detected')
-            self.tc.buy_order(
+            self.order_calculator.buy_order(
                 symbol=self.symbol,
                 order_type='market',
-                quantity=self.tc.calculate_order_size(entry_price=self.dataframe['Close'].iloc[-1]), # calculate order size needs to also calculate stop loss and take profit 
-                newClientOrderId='test_order').manage_orders(closing_price=self.dataframe['Close'].iloc[-1])
+                quantity=self.order_calculator.calculate_order_size(entry_price=self.dataframe['close'].iloc[-1]), # calculate order size needs to also calculate stop loss and take profit 
+                newClientOrderId='test_order').manage_orders(closing_price=self.dataframe['close'].iloc[-1])
             
 
     def start(self):
