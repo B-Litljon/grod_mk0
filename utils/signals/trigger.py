@@ -68,7 +68,7 @@ Note: The `rsi_divergence_strategy()` method is not yet implemented and needs to
         else:
             return False
 
-    def rsi_and_bb_expansion_strategy(self):
+    def rsi_and_bb_expansion_strategy(self, bbands, rsi, dataframe):
         if not self.stage_one_triggered:
             # Stage 1: Check if price is below the lower Bollinger Band and RSI is oversold
             current_price = self.price_data[-1]['close']
