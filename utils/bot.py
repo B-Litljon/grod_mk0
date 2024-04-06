@@ -136,7 +136,7 @@ Note:
             self.kline_data.drop(self.kline_data.index[0], inplace=True)
 
     def check_signal(self):
-        if self.trigger.rsi_and_bb_expansion_strategy():
+        if self.trigger.rsi_and_bb_expansion_strategy(bbands, rsi, dataframe=self.kline_data):
             print('Signal detected')
             self.order_calculator.buy_order(
                 symbol=self.symbol,
