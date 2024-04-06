@@ -89,16 +89,16 @@ Note:
 
             upper_band, middle_band, lower_band = self.bbands.update(close_price)
 
-            new_data = {  
-                'Time': close_time, 
-                'Open': open_price,
-                'High': high_price,
-                'Low': low_price,
-                'Close': close_price,
-                'RSI': rsi_value if rsi_value is not None else np.nan,
-                'UpperBB': upper_band,
-                'MiddleBB': middle_band,
-                'LowerBB': lower_band
+            historic_data = {  
+                'time': close_time, 
+                'open': open_price,
+                'high': high_price,
+                'low': low_price,
+                'close': close_price,
+                'rsi': rsi_value if rsi_value is not None else np.nan,
+                'upperbb': upper_band,
+                'middlebb': middle_band,
+                'lowerbb': lower_band
             }
 
             data_df_length = len(self.dataframe)
