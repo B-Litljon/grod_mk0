@@ -1,4 +1,5 @@
 from binance import Client, ThreadedWebsocketManager
+import logging
 import pandas as pd
 import numpy as np
 import time
@@ -69,8 +70,11 @@ Note:
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
         self.trigger = Triggers(bollinger_bands=self.bbands, rsi_values=self.rsi, price_data=self.kline_data)
 
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        self.logger = logging.getLogger(__name__)
+
     def fetch_historical_data(self):
-        print('Fetching historical data...')
+        self.logger.info('Fetching historical data')
         klines = self.client.get_historical_klines(self.symbol, self.interval, limit=100)
         for kline in klines:
             open_time = pd.to_datetime(kline[0], unit='ms')
