@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 from utils.indicators.bollinger_bands import BollingerBands
 from utils.indicators.rsi import RSI
-from utils.signals.trigger import Triggers as trigger
+from utils.signals.trigger import Triggers 
 from utils.safety.order_calculation import OrderCalculator, TradeConfig
 
 class BinanceWebsocketStream:
@@ -67,6 +67,7 @@ Note:
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
         self.tc = OrderCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
+        self.trigger = Triggers(BollingerBands=self.bbands, rsi=self.rsi, price_data=self.dataframe['close_price'])
 
     def fetch_historical_data(self):
         print('Fetching historical data...')
@@ -154,7 +155,7 @@ Note:
             self.dataframe.drop(self.dataframe.index[0], inplace=True)
 
     def check_signal(self):
-        if trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, self.dataframe):
+        if self.trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, self.dataframe):
             print('Signal detected')
             self.tc.buy_order(
                 symbol=self.symbol,
