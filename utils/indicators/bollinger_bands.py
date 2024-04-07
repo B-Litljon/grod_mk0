@@ -12,35 +12,33 @@ class BollingerBands:
 
     def update(self, new_price):
         # Append the new price
-        new_row = {'price': new_price}
-        self.data = self.data.append(new_row, ignore_index=True)
+        self.prices = np.append(self.prices, new_price)
 
         # Ensure we have enough data to perform calculations
         if len(self.data) >= self.window:
             # Calculate mean and standard deviation over the window
-            self.data['middle_band'] = self.data['price'].rolling(window=self.window).mean()
-            std_dev = self.data['price'].rolling(window=self.window).std()
+            self.middle_band = np.append(self.middle_band, np.mean(self.prices[-self.window:]))
+            std_dev = np.std(self.prices[-self.window:])
 
             # Calculate upper and lower bands
-            self.data['upper_band'] = self.data['middle_band'] + (std_dev * self.num_of_std)
-            self.data['lower_band'] = self.data['middle_band'] - (std_dev * self.num_of_std)
+            self.upper_band = np.append(self.upper_band, self.middle_band[-1] + (std_dev * self.num_of_std))
+            self.lower_band = np.append(self.lower_band, self.middle_band[-1] - (std_dev * self.num_of_std))
 
             # Calculate band width
-            self.data['band_width'] = self.data['upper_band'] - self.data['lower_band']
+            self.band_width = np.append(self.band_width, self.upper_band[-1] - self.lower_band[-1])
 
-        # Return the latest Bollinger Bands if available
-        if self.data.iloc[-1].isnull().any():
-            return None  # Not enough data yet
+            # Return the latest Bollinger Bands
+            return self.upper_band[-1], self.middle_band[-1], self.lower_band[-1]
         else:
-            return self.data.iloc[-1][['upper_band', 'middle_band', 'lower_band']]
+            return None
 
     def calculate_bandwidth_roc(self, rolling_window=5, period=2):
-        if len(self.data) >= rolling_window + period - 1:
+        if len(self.band_width) >= rolling_window + period - 1:
             # Calculate the rolling average of bandwidths
-            rolling_avg_bandwidths = self.data['band_width'].rolling(window=rolling_window).mean()
+            rolling_avg_bandwidths = np.convolve(self.band_width, np.ones(rolling_window) / rolling_window, mode='valid')
 
             # Calculate ROC using the specified period
-            roc = (rolling_avg_bandwidths.iloc[-1] - rolling_avg_bandwidths.iloc[-period]) / rolling_avg_bandwidths.iloc[-period]
+            roc = (rolling_avg_bandwidths[-1] - rolling_avg_bandwidths[-period]) / rolling_avg_bandwidths[-period]
             return roc
         else:
             return None
