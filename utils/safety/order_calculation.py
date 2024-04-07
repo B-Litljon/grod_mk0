@@ -116,7 +116,7 @@ Note: The `place_order` method requires a properly configured Binance client API
         try:
             # Generate a unique order ID
             order_id = f"{int(time.time() * 1000)}_{symbol}_{uuid.uuid4().hex}"
-            order = client.create_order(
+            order = client.create_test_order(
                 symbol=symbol,
                 side=Client.SIDE_BUY,
                 type=Client.ORDER_TYPE_MARKET,
@@ -145,7 +145,7 @@ Note: The `place_order` method requires a properly configured Binance client API
     def sell_order(self, current_price):
         try:
             order = self.active_order
-            sell_order = client.create_order(
+            sell_order = client.create_test_order(
                 symbol=order['symbol'],
                 side=Client.SIDE_SELL,
                 type=Client.ORDER_TYPE_MARKET,
