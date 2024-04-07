@@ -1,1 +1,0 @@
-this dir is basically useless now, the bot class used to live here but I realized that was stupid so I moved it out 
