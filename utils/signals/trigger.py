@@ -17,14 +17,14 @@ class Triggers:
         # Implement logic for RSI divergence strategy
         pass
 
-    def is_bullish_engulfing(self, dataframe):
-        if len(dataframe) < 2:
+    def is_bullish_engulfing(self):
+        if len(self.price_data) < 2:
             return False
-
-        current_candle = dataframe.iloc[-1]
-        previous_candle = dataframe.iloc[-2]    
-
-        if current_candle['close'] > previous_candle['open'] and current_candle['open'] < previous_candle['close']:
+        current_candle_open = self.price_data[-1, 0]
+        current_candle_close = self.price_data[-1, 3]
+        previous_candle_open = self.price_data[-2, 0]
+        previous_candle_close = self.price_data[-2, 3]
+        if current_candle_close > previous_candle_open and current_candle_open < previous_candle_close:
             return True
         else:
             return False
