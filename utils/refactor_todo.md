@@ -1,0 +1,7 @@
+- [ ] Modify the **BollingerBands** and **RSI** classes to use NumPy arrays instead of DataFrames.
+- [ ] In the **Bot** class, update the `__init__` method to initialize the `kline_data` attribute as a NumPy array instead of a DataFrame.
+- [ ] In the `handle_socket_message` method, update the code to append the new data to the `kline_data` NumPy array instead of a DataFrame.
+- [ ] In the `check_signal` method, pass the `kline_data` NumPy array to the `rsi_and_bb_expansion_strategy` method in the **Triggers** class.
+- [ ] After a certain number of data points or at a desired interval, convert the `kline_data` NumPy array to a DataFrame and save it to a CSV file using `to_csv` method.
+- [ ] Clear the `kline_data` NumPy array after saving it to the CSV file to avoid excessive memory usage.
+- [ ] Update the `fetch_historical_data` method to store the historical data in a NumPy array instead of a DataFrame.
