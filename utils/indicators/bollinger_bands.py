@@ -14,8 +14,8 @@ class BollingerBands:
         # Append the new price
         self.prices = np.append(self.prices, new_price)
 
-        # Ensure we have enough data to perform calculations
-        if len(self.data) >= self.window:
+        # Ensure we have enough price data to perform calculations
+        if len(self.prices) >= self.window:
             # Calculate mean and standard deviation over the window
             self.middle_band = np.append(self.middle_band, np.mean(self.prices[-self.window:]))
             std_dev = np.std(self.prices[-self.window:])
