@@ -58,7 +58,7 @@ class Bot:
             }
             data_df_length = len(self.kline_data)
             self.kline_data.loc[data_df_length] = historic_data
-        print('Historical data recieved.')
+       
 
     def handle_socket_message(self, msg):
         self.logger.info('message received')
@@ -105,6 +105,7 @@ class Bot:
                 newClientOrderId='test_order').manage_orders(closing_price=self.kline_data['close'].iloc[-1])
             
     def start(self):
+        self.fetch_historical_data()
         self.twm.start()
         stream_name = self.twm.start_kline_socket(
             symbol=self.symbol, 
