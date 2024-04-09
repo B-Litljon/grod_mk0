@@ -54,33 +54,8 @@ class Bot:
         return open_time, open_price, high_price, low_price, close_price, volume, close_time
 
     def handle_socket_message(self, msg):
-        self.logger.info('message received')
-        candle = msg['k']
-        open_price = float(candle['o'])
-        high_price = float(candle['h'])
-        low_price = float(candle['l'])
-        close_price = float(candle['c'])
-        close_time = pd.to_datetime(candle['T'], unit='ms')
-        if len(self.kline_data) > 0:
-            previous_close = self.kline_data['close'].iloc[-1]
-            rsi_value = self.rsi.update(close_price, previous_close)
-        else:
-            rsi_value = None
-        upper_band, middle_band, lower_band = self.bbands.update(close_price)
-        new_data = {
-            'time': close_time,
-            'open': open_price,
-            'high': high_price,
-            'low': low_price,
-            'close': close_price,
-            'rsi': rsi_value if rsi_value is not None else np.nan,
-            'upperbb': upper_band,
-            'middlebb': middle_band,
-            'lowerbb': lower_band
-        }
-        self.logger.info(f"latest data: {new_data}") # logging new data without concatenating it to the dataframe will give you the same value for high, low, open, close, and rsi
-        data_df_length = len(self.kline_data)
-        self.kline_data.loc[data_df_length] = new_data
+        self.logger.info('Message received')
+        self.append_data_to_dataframe(msg['k'])
         self.check_signal()
         max_rows = 101
         if len(self.kline_data) > max_rows:
