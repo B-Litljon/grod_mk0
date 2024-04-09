@@ -44,7 +44,8 @@ class Bot:
             # self.logger.debug(kline_data)
             self.append_data_to_df(kline_data)
 
-        self.logger.info("Last 5 rows of the DataFrame:\n%s", self.kline_data.tail(5).to_string(index=False))
+        self.logger.info("last 5 historic data:\n%s", self.kline_data.tail(5).to_string(index=False))
+
     def append_data_to_df(self, kline):
         # Calculate indicators
         previous_price = self.kline_data['close'].iloc[-1] if len(self.kline_data) > 0 else 0
@@ -65,7 +66,7 @@ class Bot:
         }
         self.kline_data.loc[len(self.kline_data)] = new_data
         #self.logger.info(f"New data appended to DataFrame: {new_data}")
-        self.logger.info('data appended to DataFrame')
+        #self.logger.info('data appended to DataFrame')
 
     def handle_socket_message(self, msg):
         self.logger.info('Message received')
@@ -82,9 +83,10 @@ class Bot:
             'close_time': pd.to_datetime(kline['T'], unit='ms')
         }
         self.append_data_to_df(kline_data)
+        self.logger.info("live data:\n%s", self.kline_data.tail(5).to_string(index=False))
         self.logger.debug(self.kline_data)
         self.check_signal()
-        max_rows = 101
+        max_rows = 60
         if len(self.kline_data) > max_rows:
             try:
                 row_to_append = self.kline_data.iloc[0]

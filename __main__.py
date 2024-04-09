@@ -12,7 +12,7 @@ if __name__ == "__main__":
     interval = '1M'  # input("Enter the interval you want to trade: ").lower()
 
     bot = Bot(symbol, interval, api_key, api_secret)
-    bot.fetch_historical_data()  # Fetch historical data before starting the WebSocket stream
+    #bot.fetch_historical_data()  # Fetch historical data before starting the WebSocket stream
     bot.start()
 
     # # Wait for the bot to finish or handle any other necessary cleanup
