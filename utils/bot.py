@@ -43,6 +43,7 @@ class Bot:
         # Append new data to the DataFrame
         new_data = {'time': close_time, 'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price, 'volume': volume, 'rsi': rsi_value, 'upperbb': upper_band, 'middlebb': middle_band, 'lowerbb': lower_band}
         self.kline_data = self.kline_data.append(new_data, ignore_index=True)
+        self.logger.info(f"New data appended to DataFrame: {new_data}")
        
     def process_kline(self, kline):
         open_time = pd.to_datetime(kline[0], unit='ms')
@@ -62,10 +63,13 @@ class Bot:
         self.check_signal()
         max_rows = 101
         if len(self.kline_data) > max_rows:
-            row_to_append = self.kline_data.iloc[0]
-            row_to_append.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
-            self.kline_data.drop(self.kline_data.index[0], inplace=True)
-
+            try:
+                row_to_append = self.kline_data.iloc[0]
+                row_to_append.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
+                self.kline_data.drop(self.kline_data.index[0], inplace=True)
+            except Exception as e:
+                self.logger.warning(f"Error occurred while writing to CSV: {e}")
+                
     def check_signal(self):
         if self.trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, dataframe=self.kline_data):
             print('Signal detected')
