@@ -9,6 +9,7 @@ class BollingerBands:
        self.upper_band = np.array([])
        self.middle_band = np.array([])
        self.lower_band = np.array([])
+       self.band_width = np.array([])
 
     def update(self, new_price):
         # Append the new price
