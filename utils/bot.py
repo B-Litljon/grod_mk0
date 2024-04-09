@@ -88,7 +88,7 @@ class Bot:
                 self.logger.warning(f"Error occurred while writing to CSV: {e}")
 
     def check_signal(self):
-        if self.trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, dataframe=self.kline_data):
+        if self.trigger.rsi_and_bb_expansion_strategy():
             print('Signal detected')
             self.order_calculator.buy_order(
                 symbol=self.symbol,
