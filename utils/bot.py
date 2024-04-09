@@ -32,7 +32,7 @@ class Bot:
         self.logger.info('Fetching historical data')
         klines = self.client.get_historical_klines(symbol=self.symbol, interval=self.interval, limit=100)
         for kline in klines:
-            kline_data = {
+            historic_kline_data = {
                 'time': pd.to_datetime(kline[0], unit='ms'),
                 'open': float(kline[1]),
                 'high': float(kline[2]),
@@ -42,7 +42,7 @@ class Bot:
                 'close_time': pd.to_datetime(kline[6], unit='ms')
             }
             # self.logger.debug(kline_data)
-            self.append_data_to_df(kline_data)
+            self.append_data_to_df(historic_kline_data)
 
         self.logger.info("last 5 historic data:\n%s", self.kline_data.tail(5).to_string(index=False))
 
@@ -73,7 +73,7 @@ class Bot:
         self.logger.debug(msg)
         
         kline = msg['k']
-        kline_data = {
+        live_kline_data = {
             'time': pd.to_datetime(kline['t'], unit='ms'),
             'open': float(kline['o']),
             'high': float(kline['h']),
@@ -82,7 +82,7 @@ class Bot:
             'volume': float(kline['v']),
             'close_time': pd.to_datetime(kline['T'], unit='ms')
         }
-        self.append_data_to_df(kline_data)
+        self.append_data_to_df(live_kline_data)
         self.logger.info("live data:\n%s", self.kline_data.tail(5).to_string(index=False))
         self.logger.debug(self.kline_data)
         self.check_signal()
