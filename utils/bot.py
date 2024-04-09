@@ -41,8 +41,10 @@ class Bot:
                 'volume': float(kline[5]),
                 'close_time': pd.to_datetime(kline[6], unit='ms')
             }
+            # self.logger.debug(kline_data)
             self.append_data_to_df(kline_data)
 
+        self.logger.info("Last 5 rows of the DataFrame:\n%s", self.kline_data.tail(5).to_string(index=False))
     def append_data_to_df(self, kline):
         # Calculate indicators
         previous_price = self.kline_data['close'].iloc[-1] if len(self.kline_data) > 0 else 0
@@ -62,10 +64,13 @@ class Bot:
             'lowerbb': lower_band
         }
         self.kline_data.loc[len(self.kline_data)] = new_data
-        self.logger.info(f"New data appended to DataFrame: {new_data}")
+        #self.logger.info(f"New data appended to DataFrame: {new_data}")
+        self.logger.info('data appended to DataFrame')
 
     def handle_socket_message(self, msg):
         self.logger.info('Message received')
+        self.logger.debug(msg)
+        
         kline = msg['k']
         kline_data = {
             'time': pd.to_datetime(kline['t'], unit='ms'),
@@ -77,6 +82,7 @@ class Bot:
             'close_time': pd.to_datetime(kline['T'], unit='ms')
         }
         self.append_data_to_df(kline_data)
+        self.logger.debug(self.kline_data)
         self.check_signal()
         max_rows = 101
         if len(self.kline_data) > max_rows:
