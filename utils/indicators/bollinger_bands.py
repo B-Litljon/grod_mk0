@@ -30,7 +30,7 @@ class BollingerBands:
             # Return the latest Bollinger Bands
             return self.upper_band[-1], self.middle_band[-1], self.lower_band[-1]
         else:
-            return None
+            return None, None, None
 
     def calculate_bandwidth_roc(self, rolling_window=5, period=2):
         if len(self.band_width) >= rolling_window + period - 1:
