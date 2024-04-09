@@ -43,6 +43,15 @@ class Bot:
         new_data = {'time': close_time, 'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price, 'volume': volume, 'rsi': rsi_value, 'upperbb': upper_band, 'middlebb': middle_band, 'lowerbb': lower_band}
         self.kline_data = self.kline_data.append(new_data, ignore_index=True)
        
+    def process_kline(self, kline):
+        open_time = pd.to_datetime(kline[0], unit='ms')
+        open_price = float(kline[1])
+        high_price = float(kline[2])
+        low_price = float(kline[3])
+        close_price = float(kline[4])
+        volume = float(kline[5])
+        close_time = pd.to_datetime(kline[6], unit='ms')
+        return open_time, open_price, high_price, low_price, close_price, volume, close_time
 
     def handle_socket_message(self, msg):
         self.logger.info('message received')
