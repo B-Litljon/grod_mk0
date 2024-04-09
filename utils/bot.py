@@ -33,6 +33,15 @@ class Bot:
         klines = self.client.get_historical_klines(symbol=self.symbol, interval=self.interval, limit= 100)
         for kline in klines:
             self.append_data_to_df(kline)
+
+    def append_data_to_df(self, kline):
+        open_time, open_price, high_price, low_price, close_price, volume, close_time = self.process_kline(kline)
+        # Calculate indicators
+        rsi_value = self.rsi.update(close_price)
+        upper_band, middle_band, lower_band = self.bbands.update(close_price)
+        # Append new data to the DataFrame
+        new_data = {'time': close_time, 'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price, 'volume': volume, 'rsi': rsi_value, 'upperbb': upper_band, 'middlebb': middle_band, 'lowerbb': lower_band}
+        self.kline_data = self.kline_data.append(new_data, ignore_index=True)
        
 
     def handle_socket_message(self, msg):
