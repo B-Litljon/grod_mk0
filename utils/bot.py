@@ -42,7 +42,7 @@ class Bot:
         upper_band, middle_band, lower_band = self.bbands.update(close_price)
         # Append new data to the DataFrame
         new_data = {'time': close_time, 'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price, 'volume': volume, 'rsi': rsi_value, 'upperbb': upper_band, 'middlebb': middle_band, 'lowerbb': lower_band}
-        self.kline_data = self.kline_data.append(new_data, ignore_index=True)
+        self.kline_data.loc[len(self.kline_data)] = new_data
         self.logger.info(f"New data appended to DataFrame: {new_data}")
        
     def process_kline(self, kline):
@@ -69,7 +69,7 @@ class Bot:
                 self.kline_data.drop(self.kline_data.index[0], inplace=True)
             except Exception as e:
                 self.logger.warning(f"Error occurred while writing to CSV: {e}")
-                
+
     def check_signal(self):
         if self.trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, dataframe=self.kline_data):
             print('Signal detected')
