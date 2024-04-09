@@ -13,10 +13,6 @@ class Triggers:
         self.price_data = price_data
         self.stage_one_triggered = False
 
-    def rsi_divergence_strategy(self):
-        # Implement logic for RSI divergence strategy
-        pass
-
     def is_bullish_engulfing(self):
         if len(self.price_data) < 2:
             return False
