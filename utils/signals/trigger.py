@@ -1,7 +1,7 @@
 from utils.indicators.bollinger_bands import BollingerBands
 from utils.indicators.rsi import RSI
 import logging
-import numpy as np
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -20,10 +20,10 @@ class Triggers:
     def is_bullish_engulfing(self):
         if len(self.price_data) < 2:
             return False
-        current_candle_open = self.price_data[-1, 0]
-        current_candle_close = self.price_data[-1, 3]
-        previous_candle_open = self.price_data[-2, 0]
-        previous_candle_close = self.price_data[-2, 3]
+        current_candle_open = self.price_data['open'].iloc[-1]
+        current_candle_close = self.price_data['close'].iloc[-1]
+        previous_candle_open = self.price_data['open'].iloc[-2]
+        previous_candle_close = self.price_data['close'].iloc[-2]
         if current_candle_close > previous_candle_open and current_candle_open < previous_candle_close:
             return True
         else:
@@ -32,7 +32,7 @@ class Triggers:
     def rsi_and_bb_expansion_strategy(self):
         if not self.stage_one_triggered:
             # Stage 1: Check if price is below the lower Bollinger Band and RSI is oversold
-            current_price = self.price_data[-1, 3]  # Assuming close price is at index 3
+            current_price = self.price_data['close'].iloc[-1]  # Get the close price from the DataFrame
             lower_band = self.bollinger_bands.lower_band[-1]
             if current_price < lower_band and self.rsi_values[-1] <= 25:
                 self.stage_one_triggered = True
