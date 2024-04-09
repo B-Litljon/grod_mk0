@@ -59,7 +59,7 @@ class Bot:
 
     def handle_socket_message(self, msg):
         self.logger.info('Message received')
-        self.append_data_to_dataframe(msg['k'])
+        self.append_data_to_df(msg['k'])
         self.check_signal()
         max_rows = 101
         if len(self.kline_data) > max_rows:
