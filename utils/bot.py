@@ -23,7 +23,7 @@ class Bot:
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
         self.order_calculator = OrderCalculator(TradeConfig())  # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.trigger = Triggers(bollinger_bands=self.bbands, rsi_values=self.rsi.rsi_values, price_data=self.kline_data) #rsi_value exists as an attribute in both the trigger class and rsi class
+        self.trigger = Triggers(bollinger_bands=self.bbands, rsi_values=self.rsi.values, price_data=self.kline_data) #rsi_value exists as an attribute in both the trigger class and rsi class
 
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         self.logger = logging.getLogger(__name__)
