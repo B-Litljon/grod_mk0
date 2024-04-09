@@ -37,7 +37,8 @@ class Bot:
     def append_data_to_df(self, kline):
         open_time, open_price, high_price, low_price, close_price, volume, close_time = self.process_kline(kline)
         # Calculate indicators
-        rsi_value = self.rsi.update(close_price)
+        previous_price = self.kline_data['close'].iloc[-1] if len(self.kline_data) > 0 else 0
+        rsi_value = self.rsi.update(close_price, previous_price)
         upper_band, middle_band, lower_band = self.bbands.update(close_price)
         # Append new data to the DataFrame
         new_data = {'time': close_time, 'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price, 'volume': volume, 'rsi': rsi_value, 'upperbb': upper_band, 'middlebb': middle_band, 'lowerbb': lower_band}
@@ -51,7 +52,9 @@ class Bot:
         close_price = float(kline[4])
         volume = float(kline[5])
         close_time = pd.to_datetime(kline[6], unit='ms')
+        self.logger.debug(f"Processed kline data: {kline}")
         return open_time, open_price, high_price, low_price, close_price, volume, close_time
+        
 
     def handle_socket_message(self, msg):
         self.logger.info('Message received')
