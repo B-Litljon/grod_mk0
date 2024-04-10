@@ -89,7 +89,7 @@ class Bot:
         max_rows = 60
         if len(self.kline_data) > max_rows:
             try:
-                row_to_append = self.kline_data.iloc[0]
+                row_to_append = self.kline_data.iloc[0] # this isn't working as expected, writing columns to csv instead of rows
                 row_to_append.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
                 self.kline_data.drop(self.kline_data.index[0], inplace=True)
             except Exception as e:
