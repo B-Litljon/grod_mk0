@@ -30,7 +30,7 @@ class Bot:
 
     def fetch_historical_data(self):
         self.logger.info('Fetching historical data')
-        klines = self.client.get_historical_klines(symbol=self.symbol, interval=self.interval, limit=100)
+        klines = self.client.get_historical_klines(symbol=self.symbol, interval=self.interval, limit=59)
         for kline in klines:
             historic_kline_data = {
                 'time': pd.to_datetime(kline[0], unit='ms'),
@@ -51,20 +51,22 @@ class Bot:
         previous_price = self.kline_data['close'].iloc[-1] if len(self.kline_data) > 0 else 0
         rsi_value = self.rsi.update(kline['close'], previous_price)
         upper_band, middle_band, lower_band = self.bbands.update(kline['close'])
+
         # Append new data to the DataFrame using loc
-        new_data = {
-            'time': kline['time'],
-            'open': kline['open'],
-            'high': kline['high'],
-            'low': kline['low'],
-            'close': kline['close'],
-            'volume': kline['volume'],
-            'rsi': rsi_value,
-            'upperbb': upper_band,
-            'middlebb': middle_band,
-            'lowerbb': lower_band
-        }
-        self.kline_data.loc[len(self.kline_data)] = new_data
+        new_data = pd.DataFrame({
+            'timestamp': [kline['time']],
+            'open': [kline['open']],
+            'high': [kline['high']],
+            'low': [kline['low']],
+            'close': [kline['close']],
+            'volume': [kline['volume']],
+            'rsi': [rsi_value],
+            'UpperBB': [upper_band],
+            'MiddleBB': [middle_band],
+            'LowerBB': [lower_band]
+        }, index=[len(self.kline_data)])
+
+        self.kline_data = pd.concat([self.kline_data, new_data], ignore_index=True)
         #self.logger.info(f"New data appended to DataFrame: {new_data}")
         #self.logger.info('data appended to DataFrame')
 
