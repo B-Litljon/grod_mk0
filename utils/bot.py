@@ -23,7 +23,7 @@ class Bot:
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
         self.order_calculator = OrderCalculator(TradeConfig())  # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.trigger = Triggers(bollinger_bands=self.bbands, rsi_values=self.rsi.values, price_data=self.kline_data) #rsi_value exists as an attribute in both the trigger class and rsi class
+        self.trigger = Triggers() #rsi_value exists as an attribute in both the trigger class and rsi class
 
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         self.logger = logging.getLogger(__name__)
@@ -96,12 +96,15 @@ class Bot:
                 self.logger.warning(f"Error occurred while writing to CSV: {e}")
 
     def check_signal(self):
-        if self.trigger.rsi_and_bb_expansion_strategy():
+        lower_band = self.bbands.lower_band[-1]
+        rsi_value = self.rsi.values[-1]
+        bandwidth_roc = self.bbands.calculate_bandwidth_roc()
+        if self.trigger.rsi_and_bb_expansion_strategy(price_data=self.kline_data, lower_band=lower_band, rsi_value=rsi_value, bandwidth_roc=bandwidth_roc):
             print('Signal detected')
             self.order_calculator.buy_order(
                 symbol=self.symbol,
                 order_type='market',
-                quantity=self.order_calculator.calculate_order_size(entry_price=self.kline_data['close'].iloc[-1]),  # calculate order size needs to also calculate stop loss and take profit
+                quantity=self.order_calculator.calculate_order_size(entry_price=self.kline_data['close'].iloc[-1]),
                 newClientOrderId='test_order').manage_orders(closing_price=self.kline_data['close'].iloc[-1])
 
     def start(self):
