@@ -73,7 +73,7 @@ class Bot:
     def handle_socket_message(self, msg):
         self.logger.info('Message received')
         self.logger.debug(msg)
-        
+
         kline = msg['k']
         live_kline_data = {
             'time': pd.to_datetime(kline['t'], unit='ms'),
@@ -84,15 +84,25 @@ class Bot:
             'volume': float(kline['v']),
             'close_time': pd.to_datetime(kline['T'], unit='ms')
         }
+
+        # Log the received kline data
+        self.logger.info(f"Received kline data: {live_kline_data}")
+
+        # Check if the received data already exists in the DataFrame
+        if not self.kline_data.empty and self.kline_data.tail(1)['timestamp'].iloc[0] == live_kline_data['time']:
+            self.logger.warning(f"Duplicate kline data received: {live_kline_data}")
+            return
+
         self.append_data_to_df(live_kline_data)
-        self.logger.info("live data:\n%s", self.kline_data.tail(5).to_string(index=False))
+        self.logger.info("Live data:\n%s", self.kline_data.tail(5).to_string(index=False))
         self.logger.debug(self.kline_data)
         self.check_signal()
+
         max_rows = 60
         if len(self.kline_data) > max_rows:
             try:
-                row_to_append = self.kline_data.iloc[0] # this isn't working as expected, writing columns to csv instead of rows
-                row_to_append.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
+                row_to_append = self.kline_data.iloc[0]
+                row_to_append.to_frame().T.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
                 self.kline_data.drop(self.kline_data.index[0], inplace=True)
             except Exception as e:
                 self.logger.warning(f"Error occurred while writing to CSV: {e}")

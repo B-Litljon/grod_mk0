@@ -8,10 +8,9 @@ if __name__ == "__main__":
     load_dotenv()
     api_key = os.getenv('BINANCE_API_KEY')
     api_secret = os.getenv('BINANCE_SECRET_KEY')
-    symbol = input("Enter the symbol you want to trade: ").upper() + 'USDT'
-    interval = '1M'  # input("Enter the interval you want to trade: ").lower()
-
-    bot = Bot(symbol, interval, api_key, api_secret)
+    symbol = input("Enter the symbol you want to trade: ").lower() + 'USDT'
+    interval = 'KLINE_INTERVAL_1MINUTE'
+    bot = Bot(symbol, interval, api_key, api_secret )
     #bot.fetch_historical_data()  # Fetch historical data before starting the WebSocket stream
     bot.start()
 
