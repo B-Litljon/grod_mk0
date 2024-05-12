@@ -9,13 +9,14 @@ class BollingerBands:
        self.upper_band = np.array([])
        self.middle_band = np.array([])
        self.lower_band = np.array([])
+       self.band_width = np.array([])
 
     def update(self, new_price):
         # Append the new price
         self.prices = np.append(self.prices, new_price)
 
-        # Ensure we have enough data to perform calculations
-        if len(self.data) >= self.window:
+        # Ensure we have enough price data to perform calculations
+        if len(self.prices) >= self.window:
             # Calculate mean and standard deviation over the window
             self.middle_band = np.append(self.middle_band, np.mean(self.prices[-self.window:]))
             std_dev = np.std(self.prices[-self.window:])
@@ -30,7 +31,7 @@ class BollingerBands:
             # Return the latest Bollinger Bands
             return self.upper_band[-1], self.middle_band[-1], self.lower_band[-1]
         else:
-            return None
+            return None, None, None
 
     def calculate_bandwidth_roc(self, rolling_window=5, period=2):
         if len(self.band_width) >= rolling_window + period - 1:

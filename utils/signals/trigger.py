@@ -1,57 +1,44 @@
 from utils.indicators.bollinger_bands import BollingerBands
 from utils.indicators.rsi import RSI
 import logging
-import numpy as np
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class Triggers:
-    def __init__(self, bollinger_bands, rsi_values, price_data):
-        self.bollinger_bands = bollinger_bands
-        self.rsi_values = rsi_values
-        self.price_data = price_data
+    def __init__(self):
         self.stage_one_triggered = False
 
-    def rsi_divergence_strategy(self):
-        # Implement logic for RSI divergence strategy
-        pass
-
-    def is_bullish_engulfing(self):
+    def is_bullish_engulfing(self, price_data):
         if len(self.price_data) < 2:
             return False
-        current_candle_open = self.price_data[-1, 0]
-        current_candle_close = self.price_data[-1, 3]
-        previous_candle_open = self.price_data[-2, 0]
-        previous_candle_close = self.price_data[-2, 3]
+        current_candle_open = self.price_data['open'].iloc[-1]
+        current_candle_close = self.price_data['close'].iloc[-1]
+        previous_candle_open = self.price_data['open'].iloc[-2]
+        previous_candle_close = self.price_data['close'].iloc[-2]
         if current_candle_close > previous_candle_open and current_candle_open < previous_candle_close:
             return True
         else:
             return False
 
-    def rsi_and_bb_expansion_strategy(self):
+    def rsi_and_bb_expansion_strategy(self, price_data, lower_band, rsi_value, bandwidth_roc):
         if not self.stage_one_triggered:
-            # Stage 1: Check if price is below the lower Bollinger Band and RSI is oversold
-            current_price = self.price_data[-1, 3]  # Assuming close price is at index 3
-            lower_band = self.bollinger_bands.lower_band[-1]
-            if current_price < lower_band and self.rsi_values[-1] <= 25:
+            current_price = price_data['close'].iloc[-1]
+            if current_price < lower_band and rsi_value <= 25:
                 self.stage_one_triggered = True
-                logger.info(f"Stage 1 triggered: Price ({current_price}) below lower band ({lower_band}) and RSI ({self.rsi_values[-1]}) oversold")
+                logger.info(f"Stage 1 triggered: Price ({current_price}) below lower band ({lower_band}) and RSI ({rsi_value}) oversold")
             else:
-                logger.debug(f"Stage 1 not triggered: Price ({current_price}) above lower band ({lower_band}) or RSI ({self.rsi_values[-1]}) not oversold")
-                return False
+                logger.debug(f"Stage 1 not triggered: Price ({current_price}) above lower band ({lower_band}) or RSI ({rsi_value}) not oversold")
+            return False
 
-        # Stage 2: Check if RSI is back in the normal range, Bollinger Bands are expanding, and bullish engulfing pattern
         if self.stage_one_triggered:
-            if 30 <= self.rsi_values[-1] < 35:
-                # Utilize the calculate_bandwidth_roc method to check for Bollinger Bands expansion
-                # Assuming a positive ROC indicates expansion. Adjust the threshold as needed.
-                bandwidth_roc = self.bollinger_bands.calculate_bandwidth_roc()
-                if bandwidth_roc is not None and bandwidth_roc > 0.15:  # Example threshold for ROC
+            if 30 <= rsi_value < 35:
+                if bandwidth_roc is not None and bandwidth_roc > 0.15:
                     logger.info(f"Bollinger Bands expanding: Bandwidth ROC ({bandwidth_roc}) above threshold (0.15)")
-                    if self.is_bullish_engulfing():
+                    if self.is_bullish_engulfing(price_data):
                         logger.info("Bullish engulfing pattern detected")
-                        self.stage_one_triggered = False  # Reset stage one trigger
+                        self.stage_one_triggered = False
                         logger.info("RSI and Bollinger Bands expansion strategy triggered")
                         return True
                     else:
@@ -59,7 +46,7 @@ class Triggers:
                 else:
                     logger.debug(f"Bollinger Bands not expanding: Bandwidth ROC ({bandwidth_roc}) below threshold (0.15)")
             else:
-                logger.debug(f"RSI ({self.rsi_values[-1]}) not in the normal range (30-35)")
+                logger.debug(f"RSI ({rsi_value}) not in the normal range (30-35)")
         return False
     
 # dev note: you may need to incorporate some logic to limit the window of time stage two has to trigger, 

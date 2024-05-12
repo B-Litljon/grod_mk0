@@ -3,3 +3,5 @@ grodmk0venv
 __pycache__
 scratch.py
 developmentNotes
+kline_data.csv
+todo.md

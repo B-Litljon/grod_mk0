@@ -7,7 +7,7 @@ class RSI:
         self.gains = np.array([])
         self.losses = np.array([])
         self.prices = np.array([])
-        self.rsi_values = np.array([])
+        self.values = np.array([])
 
     def update(self, new_price, previous_price):
         delta = new_price - previous_price
@@ -28,7 +28,7 @@ class RSI:
         rs = avg_gain / avg_loss if avg_loss != 0 else 0
         rsi = 100 - (100 / (1 + rs))
         
-        self.rsi_values = np.append(self.rsi_values, rsi)
+        self.values = np.append(self.values, rsi)
 
         return rsi
     
@@ -38,8 +38,8 @@ class RSI:
 
         current_price = price
         previous_price = self.prices[-2]
-        current_rsi = self.rsi_values[-1]
-        previous_rsi = self.rsi_values[-2]
+        current_rsi = self.values[-1]
+        previous_rsi = self.values[-2]
 
         if current_price > previous_price and current_rsi < previous_rsi:
             return 'bullish divergence'

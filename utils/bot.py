@@ -12,105 +12,121 @@ from utils.signals.trigger import Triggers
 from utils.safety.order_calculation import OrderCalculator, TradeConfig
 
 class Bot:
-    def __init__(self, symbol, interval, api_key , api_secret):
+    def __init__(self, symbol, interval, api_key, api_secret):
         self.symbol = symbol
         self.interval = interval
         self.api_key = api_key
         self.api_secret = api_secret
-        self.bbands = BollingerBands(window= 20, num_of_std=2)
+        self.bbands = BollingerBands(window=20, num_of_std=2)
         self.rsi = RSI(period=14)
-        self.kline_data = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
+        self.kline_data = pd.DataFrame(columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'rsi', 'UpperBB', 'MiddleBB', 'LowerBB'])
         self.twm = ThreadedWebsocketManager(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.order_calculator = OrderCalculator(TradeConfig()) # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
+        self.order_calculator = OrderCalculator(TradeConfig())  # 'tc' is an instance of OrderCalculator class renamed in this case to 'OrderCalculator'
         self.client = Client(api_key=self.api_key, api_secret=self.api_secret, tld='us')
-        self.trigger = Triggers(bollinger_bands=self.bbands, rsi_values=self.rsi, price_data=self.kline_data)
+        self.trigger = Triggers() #rsi_value exists as an attribute in both the trigger class and rsi class
 
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         self.logger = logging.getLogger(__name__)
 
     def fetch_historical_data(self):
         self.logger.info('Fetching historical data')
-        klines = self.client.get_historical_klines(self.symbol, self.interval, limit=100)
+        klines = self.client.get_historical_klines(symbol=self.symbol, interval=self.interval, limit=59)
         for kline in klines:
-            open_time = pd.to_datetime(kline[0], unit='ms')
-            open_price = float(kline[1])
-            high_price = float(kline[2])
-            low_price = float(kline[3])
-            close_price = float(kline[4])
-            volume = float(kline[5])
-            close_time = pd.to_datetime(kline[6], unit='ms')
-            if len(self.kline_data) > 0:
-                previous_close = self.kline_data['close'].iloc[-1]
-                rsi_value = self.rsi.update(close_price, previous_close)
-            else:
-                rsi_value = None
-            upper_band, middle_band, lower_band = self.bbands.update(close_price)
-            historic_data = {
-                'time': close_time,
-                'open': open_price,
-                'high': high_price,
-                'low': low_price,
-                'close': close_price,
-                'rsi': rsi_value if rsi_value is not None else np.nan,
-                'upperbb': upper_band,
-                'middlebb': middle_band,
-                'lowerbb': lower_band
+            historic_kline_data = {
+                'time': pd.to_datetime(kline[0], unit='ms'),
+                'open': float(kline[1]),
+                'high': float(kline[2]),
+                'low': float(kline[3]),
+                'close': float(kline[4]),
+                'volume': float(kline[5]),
+                'close_time': pd.to_datetime(kline[6], unit='ms')
             }
-            data_df_length = len(self.kline_data)
-            self.kline_data.loc[data_df_length] = historic_data
-        print('Historical data recieved.')
+            # self.logger.debug(kline_data)
+            self.append_data_to_df(historic_kline_data)
+
+        self.logger.info("last 5 historic data:\n%s", self.kline_data.tail(5).to_string(index=False))
+
+    def append_data_to_df(self, kline):
+        # Calculate indicators
+        previous_price = self.kline_data['close'].iloc[-1] if len(self.kline_data) > 0 else 0
+        rsi_value = self.rsi.update(kline['close'], previous_price)
+        upper_band, middle_band, lower_band = self.bbands.update(kline['close'])
+
+        # Append new data to the DataFrame using loc
+        new_data = pd.DataFrame({
+            'timestamp': [kline['time']],
+            'open': [kline['open']],
+            'high': [kline['high']],
+            'low': [kline['low']],
+            'close': [kline['close']],
+            'volume': [kline['volume']],
+            'rsi': [rsi_value],
+            'UpperBB': [upper_band],
+            'MiddleBB': [middle_band],
+            'LowerBB': [lower_band]
+        }, index=[len(self.kline_data)])
+
+        self.kline_data = pd.concat([self.kline_data, new_data], ignore_index=True)
+        #self.logger.info(f"New data appended to DataFrame: {new_data}")
+        #self.logger.info('data appended to DataFrame')
 
     def handle_socket_message(self, msg):
-        self.logger.info('message received')
-        candle = msg['k']
-        open_price = float(candle['o'])
-        high_price = float(candle['h'])
-        low_price = float(candle['l'])
-        close_price = float(candle['c'])
-        close_time = pd.to_datetime(candle['T'], unit='ms')
-        if len(self.kline_data) > 0:
-            previous_close = self.kline_data['close'].iloc[-1]
-            rsi_value = self.rsi.update(close_price, previous_close)
-        else:
-            rsi_value = None
-        upper_band, middle_band, lower_band = self.bbands.update(close_price)
-        new_data = {
-            'time': close_time,
-            'open': open_price,
-            'high': high_price,
-            'low': low_price,
-            'close': close_price,
-            'rsi': rsi_value if rsi_value is not None else np.nan,
-            'upperbb': upper_band,
-            'middlebb': middle_band,
-            'lowerbb': lower_band
+        self.logger.info('Message received')
+        self.logger.debug(msg)
+
+        kline = msg['k']
+        live_kline_data = {
+            'time': pd.to_datetime(kline['t'], unit='ms'),
+            'open': float(kline['o']),
+            'high': float(kline['h']),
+            'low': float(kline['l']),
+            'close': float(kline['c']),
+            'volume': float(kline['v']),
+            'close_time': pd.to_datetime(kline['T'], unit='ms')
         }
-        self.logger.info(f"latest data: {new_data}") # logging new data without concatenating it to the dataframe will give you the same value for high, low, open, close, and rsi
-        data_df_length = len(self.kline_data)
-        self.kline_data.loc[data_df_length] = new_data
+
+        # Log the received kline data
+        self.logger.info(f"Received kline data: {live_kline_data}")
+
+        # Check if the received data already exists in the DataFrame
+        if not self.kline_data.empty and self.kline_data.tail(1)['timestamp'].iloc[0] == live_kline_data['time']:
+            self.logger.warning(f"Duplicate kline data received: {live_kline_data}")
+            return
+
+        self.append_data_to_df(live_kline_data)
+        self.logger.info("Live data:\n%s", self.kline_data.tail(5).to_string(index=False))
+        self.logger.debug(self.kline_data)
         self.check_signal()
-        max_rows = 101
+
+        max_rows = 60
         if len(self.kline_data) > max_rows:
-            row_to_append = self.kline_data.iloc[0]
-            row_to_append.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
-            self.kline_data.drop(self.kline_data.index[0], inplace=True)
+            try:
+                row_to_append = self.kline_data.iloc[0]
+                row_to_append.to_frame().T.to_csv('kline_data.csv', mode='a', header=not os.path.exists('kline_data.csv'), index=False)
+                self.kline_data.drop(self.kline_data.index[0], inplace=True)
+            except Exception as e:
+                self.logger.warning(f"Error occurred while writing to CSV: {e}")
 
     def check_signal(self):
-        if self.trigger.rsi_and_bb_expansion_strategy(self.bbands, self.rsi, dataframe=self.kline_data):
+        lower_band = self.bbands.lower_band[-1]
+        rsi_value = self.rsi.values[-1]
+        bandwidth_roc = self.bbands.calculate_bandwidth_roc()
+        if self.trigger.rsi_and_bb_expansion_strategy(price_data=self.kline_data, lower_band=lower_band, rsi_value=rsi_value, bandwidth_roc=bandwidth_roc):
             print('Signal detected')
             self.order_calculator.buy_order(
                 symbol=self.symbol,
                 order_type='market',
-                quantity=self.order_calculator.calculate_order_size(entry_price=self.kline_data['close'].iloc[-1]), # calculate order size needs to also calculate stop loss and take profit 
+                quantity=self.order_calculator.calculate_order_size(entry_price=self.kline_data['close'].iloc[-1]),
                 newClientOrderId='test_order').manage_orders(closing_price=self.kline_data['close'].iloc[-1])
-            
+
     def start(self):
+        self.fetch_historical_data()
         self.twm.start()
         stream_name = self.twm.start_kline_socket(
-            symbol=self.symbol, 
-            interval=self.interval, 
+            symbol=self.symbol,
+            interval=self.interval,
             callback=self.handle_socket_message
-        ) # need to call fetch historical data here to fill the dataframe b4 the ws stream starts
+        )  # need to call fetch historical data here to fill the dataframe b4 the ws stream starts
         try:
             while True:
                 time.sleep(1)
