@@ -17,7 +17,7 @@ api_secret = os.getenv ('BINANCE_API_SECRET')
 client = Client(api_key, api_secret, tld='us')
 
 class TradeConfig:
-    def __init__(self, rsi_oversold=25, rsi_overbought=75, max_risk_per_trade=0.02, total_capital=1000):
+    def __init__(self, rsi_oversold=25, rsi_overbought=75, max_risk_per_trade=0.02, total_capital=1000): #total capital should be the amount of usdt in the account, this is just a placeholder
         self.rsi_oversold = rsi_oversold
         self.rsi_overbought = rsi_overbought
         self.max_risk_per_trade = max_risk_per_trade
