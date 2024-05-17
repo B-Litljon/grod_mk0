@@ -1,4 +1,5 @@
 import pandas as pd
+
 class SupportResistance:
     def __init__(self, window=14):
         self.window = window
