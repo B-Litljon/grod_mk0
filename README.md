@@ -1,5 +1,7 @@
 # grod_mk0 - 'Get Rich Or Die' Trading
 
+***disclaimer*** these instructions are not quite done yet, the bot is not fully functional
+
 ## Introduction
 
 Welcome to **grod_mk0**, the trading bot designed with one goal in mind: **Get Rich Or Die** trying. In a world where the 40-hour workweek is no longer a guarantee of a comfortable life, grod_mk0 steps in to manage your assets, protect your fiat with stop-loss orders, and grow your portfolio.
