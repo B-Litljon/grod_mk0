@@ -10,6 +10,21 @@ class RSI:
         self.values = np.array([])
 
     def update(self, new_price, previous_price):
+        """
+        Update the RSI with a new price data point.
+
+        This method calculates the gain or loss based on the difference between the new price
+        and the previous price, appends the gain or loss to the respective arrays, and appends
+        the new price to the prices array. It then calculates the average gain and loss over
+        the specified period and computes the RSI value.
+
+        Args:
+            new_price (float): The new price data point.
+            previous_price (float): The previous price data point.
+
+        Returns:
+            float: The calculated RSI value.
+        """
         delta = new_price - previous_price
         gain = max(delta, 0)
         loss = abs(min(delta, 0))
@@ -33,6 +48,22 @@ class RSI:
         return rsi
     
     def check_divergence(self, price):
+        """
+        Check for divergence between price and RSI.
+
+        This method compares the current price and RSI values with the previous price and RSI
+        values to identify bullish or bearish divergences. A bullish divergence occurs when
+        the price makes a lower low, but RSI forms a higher low. A bearish divergence occurs
+        when the price makes a higher high, but RSI forms a lower high.
+
+        Args:
+            price (float): The current price.
+
+        Returns:
+            str or None: 'bullish divergence' if a bullish divergence is detected,
+                         'bearish divergence' if a bearish divergence is detected,
+                         or None if no divergence is found or there is insufficient data.
+        """
         if len(self.prices) < 2:
             return None
 
