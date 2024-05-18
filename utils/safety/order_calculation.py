@@ -107,12 +107,14 @@ class OrderCalculator:
             logger.error(f"Error executing sell order: {str(e)}")
     # compares the tp/sl to the current price and sells the order if the price is reached
     def manage_orders(self, current_price):
-        if self.active_order:
-            order = self.active_order
+        if not self.active_orders:
+            return  # If there are no active orders, return early
+
+        for order_id, order in list(self.active_orders.items()):
             if order['status'] == 'NEW':
                 if current_price <= order['stop_loss']:
-                    logger.info(f"Stop loss triggered for order {order['order_id']}")
-                    self.sell_order(current_price)
+                    # ...
+                    self.sell_order(order_id, current_price)
                 elif current_price >= order['take_profit']:
-                    logger.info(f"Take profit triggered for order {order['order_id']}")
-                    self.sell_order(current_price)
+                    # ...
+                    self.sell_order(order_id, current_price)
