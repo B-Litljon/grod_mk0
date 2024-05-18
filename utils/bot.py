@@ -96,6 +96,8 @@ class Bot:
         self.append_data_to_df(live_kline_data)
         self.logger.info("Live data:\n%s", self.kline_data.tail(5).to_string(index=False))
         self.logger.debug(self.kline_data)
+        current_price = self.kline_data['close'].iloc[-1]
+        self.order_calculator.manage_orders(current_price)
         self.check_signal()
 
         max_rows = 60
