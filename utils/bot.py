@@ -12,6 +12,28 @@ from utils.signals.trigger import Triggers
 from utils.safety.order_calculation import OrderCalculator, TradeConfig
 
 class Bot:
+    """
+    A class for managing and running a trading bot.
+
+    This class handles the initialization of the trading bot, including setting up the
+    necessary indicators, order calculator, and API client. It also provides methods for
+    fetching historical data, appending data to the DataFrame, handling WebSocket messages,
+    checking for trading signals, and starting the bot.
+
+    Attributes:
+        symbol (str): The trading symbol.
+        interval (str): The interval for the trading data.
+        api_key (str): The API key for authentication.
+        api_secret (str): The API secret for authentication.
+        bbands (BollingerBands): An instance of the BollingerBands class for calculating Bollinger Bands.
+        rsi (RSI): An instance of the RSI class for calculating the Relative Strength Index.
+        kline_data (pandas.DataFrame): A DataFrame to store the trading data.
+        twm (ThreadedWebsocketManager): An instance of the ThreadedWebsocketManager for handling WebSocket connections.
+        order_calculator (OrderCalculator): An instance of the OrderCalculator class for calculating and managing orders.
+        client (Client): An instance of the Binance API client.
+        trigger (Triggers): An instance of the Triggers class for evaluating trading triggers.
+        logger (logging.Logger): A logger instance for logging messages.
+    """
     def __init__(self, symbol, interval, api_key, api_secret):
         self.symbol = symbol
         self.interval = interval
@@ -29,6 +51,12 @@ class Bot:
         self.logger = logging.getLogger(__name__)
 
     def fetch_historical_data(self):
+        """
+        Fetch historical trading data and append it to the DataFrame.
+
+        This method retrieves historical kline data using the Binance API client and appends
+        the data to the `kline_data` DataFrame. It also logs the last 5 historical data points.
+        """
         self.logger.info('Fetching historical data')
         klines = self.client.get_historical_klines(symbol=self.symbol, interval=self.interval, limit=59)
         for kline in klines:
@@ -47,6 +75,15 @@ class Bot:
         self.logger.info("last 5 historic data:\n%s", self.kline_data.tail(5).to_string(index=False))
 
     def append_data_to_df(self, kline):
+        """
+        Append new trading data to the DataFrame.
+
+        This method calculates the necessary indicators (RSI and Bollinger Bands) based on the
+        new trading data and appends the data to the `kline_data` DataFrame.
+
+        Args:
+            kline (dict): A dictionary containing the new trading data.
+        """
         # Calculate indicators
         previous_price = self.kline_data['close'].iloc[-1] if len(self.kline_data) > 0 else 0
         rsi_value = self.rsi.update(kline['close'], previous_price)
@@ -71,6 +108,16 @@ class Bot:
         #self.logger.info('data appended to DataFrame')
 
     def handle_socket_message(self, msg):
+        """
+        Handle incoming WebSocket messages.
+
+        This method processes the received WebSocket message, extracts the relevant trading data,
+        appends it to the DataFrame, manages active orders, and checks for trading signals.
+        It also logs the received data and the last 5 live data points.
+
+        Args:
+            msg (dict): The received WebSocket message.
+        """
         self.logger.info('Message received')
         self.logger.debug(msg)
 
@@ -110,6 +157,13 @@ class Bot:
                 self.logger.warning(f"Error occurred while writing to CSV: {e}")
 
     def check_signal(self):
+        """
+        Check for trading signals and execute orders accordingly.
+
+        This method retrieves the necessary indicator values (lower band, RSI value, and bandwidth ROC)
+        and evaluates the RSI and Bollinger Bands expansion strategy using the Triggers class.
+        If a signal is detected, it executes a buy order using the OrderCalculator.
+        """
         lower_band = self.bbands.lower_band[-1]
         rsi_value = self.rsi.values[-1]
         bandwidth_roc = self.bbands.calculate_bandwidth_roc()
@@ -122,6 +176,13 @@ class Bot:
                 newClientOrderId='test_order').manage_orders(closing_price=self.kline_data['close'].iloc[-1])
 
     def start(self):
+        """
+        Start the trading bot.
+
+        This method fetches historical data, starts the ThreadedWebsocketManager, and initiates
+        the WebSocket stream for receiving live trading data. It also sets up a loop to keep the
+        bot running until a keyboard interrupt is received.
+        """
         self.fetch_historical_data()
         self.twm.start()
         stream_name = self.twm.start_kline_socket(
