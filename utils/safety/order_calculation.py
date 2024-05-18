@@ -17,6 +17,25 @@ api_secret = os.getenv ('BINANCE_API_SECRET')
 client = Client(api_key, api_secret, tld='us')
 
 class TradeConfig:
+    """
+    A class to store trading configuration parameters.
+
+    Attributes:
+        rsi_oversold (int): The RSI value that indicates an oversold condition.
+        rsi_overbought (int): The RSI value that indicates an overbought condition.
+        max_risk_per_trade (float): The maximum risk percentage allowed per trade.
+        total_capital (float): The total capital available for trading.
+
+    Methods:
+        __init__(self, rsi_oversold=25, rsi_overbought=75, max_risk_per_trade=0.02, total_capital=1000):
+            Initializes the TradeConfig object with the given parameters.
+
+            Args:
+                rsi_oversold (int, optional): The RSI value that indicates an oversold condition. Default is 25.
+                rsi_overbought (int, optional): The RSI value that indicates an overbought condition. Default is 75.
+                max_risk_per_trade (float, optional): The maximum risk percentage allowed per trade. Default is 0.02 (2%).
+                total_capital (float, optional): The total capital available for trading. Default is 1000.
+    """
     def __init__(self, rsi_oversold=25, rsi_overbought=75, max_risk_per_trade=0.02, total_capital=1000): #total capital should be the amount of usdt in the account, this is just a placeholder
         self.rsi_oversold = rsi_oversold
         self.rsi_overbought = rsi_overbought
@@ -24,12 +43,35 @@ class TradeConfig:
         self.total_capital = total_capital
 
 class OrderCalculator:
+    """
+    A class for calculating and managing orders based on a given trading strategy.
+
+    This class provides methods to calculate the order size, place buy and sell orders,
+    and manage active orders based on the current market price. It also keeps track of
+    the USDT balance and the risk per trade.
+
+    Attributes:
+        usdt_balance (float): The initial USDT balance for placing orders.
+        risk_per_trade (float): The percentage of the balance to risk per trade.
+        active_orders (dict): A dictionary to store active orders.
+    """
     def __init__(self, initial_usdt_balance, risk_per_trade=0.01):
         self.usdt_balance = initial_usdt_balance # needs to get the actual usdt balance from the account since the algo will only use usdt to place orders
         self.risk_per_trade = risk_per_trade
         self.active_orders = {}
     # Calculate the size of the order to place for added safety
     def calculate_order_size(self, entry_price, middle_band):
+        """
+        Calculate the size of the order to place based on the entry price and middle band.
+
+        Args:
+            entry_price (float): The entry price for the order.
+            middle_band (float): The middle band price used for calculating the take profit.
+
+        Returns:
+            tuple: A tuple containing the rounded number of shares to buy,
+                   the stop loss price, and the take profit price.
+        """
         stop_loss_percentage = 0.02
         stop_loss = entry_price * (1 - stop_loss_percentage)
         take_profit = middle_band * 0.999  # Adjust the multiplier as needed
@@ -44,6 +86,20 @@ class OrderCalculator:
         return rounded_shares, stop_loss, take_profit
     
     def buy_order(self, symbol, quantity, entry_price, take_profit, stop_loss):
+        """
+        Place a buy order for the specified symbol and quantity.
+
+        Args:
+            symbol (str): The trading symbol for the order.
+            quantity (float): The quantity of shares to buy.
+            entry_price (float): The entry price for the order.
+            take_profit (float): The take profit price for the order.
+            stop_loss (float): The stop loss price for the order.
+
+        Returns:
+            str or None: The unique order ID if the order is placed successfully,
+                         or None if an error occurs.
+        """
         try:
             # Generate a unique order ID
             order_id = f"{int(time.time() * 1000)}_{symbol}_{uuid.uuid4().hex}"
@@ -74,6 +130,19 @@ class OrderCalculator:
             return None
 
     def sell_order(self, current_price):
+        """
+        Place a sell order for the active order based on the current market price.
+
+        This method retrieves the active order details, places a sell order, updates the
+        order status, calculates the profit or loss, and writes the order details to a
+        CSV file.
+
+        Args:
+            current_price (float): The current market price.
+
+        Returns:
+            None
+        """
         try:
             order = self.active_order
             sell_order = client.create_test_order(
@@ -107,6 +176,19 @@ class OrderCalculator:
             logger.error(f"Error executing sell order: {str(e)}")
     # compares the tp/sl to the current price and sells the order if the price is reached
     def manage_orders(self, current_price):
+        """
+        Manage active orders based on the current market price.
+
+        This method compares the current price with the take profit and stop loss prices
+        of active orders. If the current price reaches either the take profit or stop loss
+        price, it triggers a sell order for the corresponding order.
+
+        Args:
+            current_price (float): The current market price.
+
+        Returns:
+            None
+        """
         if not self.active_orders:
             return  # If there are no active orders, return early
 
