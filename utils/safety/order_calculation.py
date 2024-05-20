@@ -1,3 +1,8 @@
+# decided a better way to make use of this class is to create a new method 'long_order' 
+# long order would combine buy/sell and order manager into one method that can be called in the check_signal method or in the trigger class itself
+# this provides a more modular approach to the code and makes it easier to manage the order logic
+
+
 from binance.client import Client
 from dotenv import load_dotenv
 import os
